@@ -1,0 +1,34 @@
+{
+    "name": "com.playtolia.sdk",
+    "version": "1.3.8",
+    "displayName": "Playtolia SDK",
+    "description": "Playtolia client SDK for Unity games — authentication, billing, social, push, ticketing and more. Android + iOS.",
+    "unity": "6000.0",
+    "unityRelease": "32f1",
+    "documentationUrl": "https://github.com/Playtolia/unity-sdk",
+    "changelogUrl": "https://github.com/Playtolia/unity-sdk/blob/main/CHANGELOG.md",
+    "licensesUrl": "https://github.com/Playtolia/unity-sdk/blob/main/LICENSE.md",
+    "keywords": [
+        "Playtolia",
+        "auth",
+        "authentication",
+        "billing",
+        "sdk",
+        "ticketing",
+        "social",
+        "push",
+        "support"
+    ],
+    "author": {
+        "name": "Playtolia",
+        "email": "eray@grainql.com",
+        "url": "https://github.com/Playtolia"
+    },
+    "samples": [
+        {
+            "displayName": "Smoke Test",
+            "description": "Minimal initialization + compat call smoke test used by CI and manual verification.",
+            "path": "Samples~/SmokeTest"
+        }
+    ]
+}

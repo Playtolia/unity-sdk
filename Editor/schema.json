@@ -1,0 +1,14 @@
+{
+  "gameId": "@@@gameId@@@",
+  "enablePersistence": "@@@enablePersistence@@@",
+  "enableAuthentication": "@@@enableAuthentication@@@",
+  "authenticationRequired": "@@@authenticationRequired@@@",
+  "googleAuthentication": "@@@googleAuthentication@@@",
+  "facebookAuthentication": "@@@facebookAuthentication@@@",
+  "appleAuthentication": "@@@appleAuthentication@@@",
+  "discordAuthentication": "@@@discordAuthentication@@@",
+  "guestAuthentication": "@@@guestAuthentication@@@",
+  "enableTicketing": "@@@enableTicketing@@@",
+  "enableBilling": "@@@enableBilling@@@",
+  "logLevel": "@@@logLevel@@@"
+}
