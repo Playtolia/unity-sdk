@@ -1,0 +1,41 @@
+# Deploys the `gh-pages` data store (which the SDK release workflow pushes the UPM
+# registry to) to GitHub Pages via the Actions artifact path — serving files verbatim,
+# with NO Jekyll legacy build (that build fails on the registry's dotted/dashed paths).
+# Requires the repo's Pages source to be set to "GitHub Actions" (Settings ▸ Pages ▸ Source).
+#
+# Source of truth: PlaytoliaSDK repo, .github/templates/unity-sdk-pages.yml.
+name: Deploy UPM registry to Pages
+
+# The SDK release workflow dispatches this after it pushes the registry to gh-pages.
+# A push-to-gh-pages trigger would NOT work: gh-pages is an orphan branch with no
+# .github/, and a `push` event runs the workflow copy from the pushed branch — so it
+# never fires there. Dispatch is the path.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two Pages deploys at once; let the latest win.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .          # gh-pages content: CNAME + .nojekyll + unity-sdk/… served verbatim
+      - id: deployment
+        uses: actions/deploy-pages@v4
