@@ -22,7 +22,7 @@
 
          Additional repositories can be added using the "repositories" element.
     -->
-    <androidPackage spec="com.playtolia.sdk:core-android:1.3.9">
+    <androidPackage spec="com.playtolia.sdk:core-android:1.4.0">
       <repositories>
         <repository>https://repo.maven.apache.org/maven2</repository>
       </repositories>

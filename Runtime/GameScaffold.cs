@@ -23,5 +23,15 @@ namespace PlaytoliaSDK.Runtime
         {
             PlaytoliaScaffoldPlatformFunc.Induce(inducedEvent);
         }
+
+        /// <summary>
+        /// Opens the Playtolia overlay menu, exactly as tapping the floating Playtolia
+        /// button would. Signed-out players are shown the login prompt instead.
+        /// Shorthand for <see cref="Induce"/> with <see cref="InducedScaffoldEvent.UIShowMenu"/>.
+        /// </summary>
+        public static void LaunchMenu()
+        {
+            Induce(InducedScaffoldEvent.UIShowMenu);
+        }
     }
 }

@@ -7273,9 +7273,12 @@ __attribute__((swift_name("InducedScaffoldEvent")))
 + (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
 - (instancetype)initWithName:(NSString *)name ordinal:(int32_t)ordinal __attribute__((swift_name("init(name:ordinal:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
 @property (class, readonly) CoreInducedScaffoldEvent *none __attribute__((swift_name("none")));
+@property (class, readonly) CoreInducedScaffoldEvent *uishowmenu __attribute__((swift_name("uishowmenu")));
 @property (class, readonly) CoreInducedScaffoldEvent *uicreateticket __attribute__((swift_name("uicreateticket")));
 @property (class, readonly) CoreInducedScaffoldEvent *uishowtickets __attribute__((swift_name("uishowtickets")));
 @property (class, readonly) CoreInducedScaffoldEvent *uishowsettings __attribute__((swift_name("uishowsettings")));
+@property (class, readonly) CoreInducedScaffoldEvent *uishowfriends __attribute__((swift_name("uishowfriends")));
+@property (class, readonly) CoreInducedScaffoldEvent *uishowprofile __attribute__((swift_name("uishowprofile")));
 @property (class, readonly) CoreInducedScaffoldEvent *uidetach __attribute__((swift_name("uidetach")));
 + (CoreKotlinArray<CoreInducedScaffoldEvent *> *)values __attribute__((swift_name("values()")));
 @property (class, readonly) NSArray<CoreInducedScaffoldEvent *> *entries __attribute__((swift_name("entries")));
