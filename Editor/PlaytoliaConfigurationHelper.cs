@@ -9,6 +9,8 @@ namespace Playtolia.Editor
             tmp = "{";
             SetValue("gameId", PlaytoliaEditorSettings.GetGameId());
             SetValue("headless", PlaytoliaEditorSettings.IsHeadlessEnabled());
+            SetValue("overlayButtonDraggingEnabled",
+                PlaytoliaEditorSettings.IsOverlayButtonDraggingEnabled());
             
             // Custom Origin
             if (PlaytoliaEditorSettings.IsCustomOriginEnabled())

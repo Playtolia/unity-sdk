@@ -83,6 +83,7 @@ class PlaytoliaEditorSettings : ScriptableObject
 
     [SerializeField] private string m_GameId;
     [SerializeField] private bool m_Headless;
+    [SerializeField] private bool m_OverlayButtonDraggingEnabled = true;
     [SerializeField] private bool m_EnableCustomOrigin;
     [SerializeField] private string m_CustomOrigin;
     [SerializeField] private bool m_AuthEnabled;
@@ -135,6 +136,7 @@ class PlaytoliaEditorSettings : ScriptableObject
             settings = ScriptableObject.CreateInstance<PlaytoliaEditorSettings>();
             settings.m_GameId = "";
             settings.m_Headless = false;
+            settings.m_OverlayButtonDraggingEnabled = true;
             settings.m_EnableCustomOrigin = false;
             settings.m_CustomOrigin = "";
             settings.m_AuthEnabled = true;
@@ -198,6 +200,12 @@ class PlaytoliaEditorSettings : ScriptableObject
     {
         var settings = GetOrCreateSettings();
         return settings.m_Headless;
+    }
+
+    public static bool IsOverlayButtonDraggingEnabled()
+    {
+        var settings = GetOrCreateSettings();
+        return settings.m_OverlayButtonDraggingEnabled;
     }
 
     public static bool IsCustomOriginEnabled()
@@ -441,6 +449,13 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 EditorGUILayout.PropertyField(settings.FindProperty("m_Headless"), new GUIContent("Headless"));
                 EditorGUILayout.HelpBox(
                     "When enabled, PlaytoliaUI attach (e.g. from PlaytoliaGameObject) will not attach any views or controllers. Use for API-only flows.",
+                    MessageType.Info);
+                EditorGUILayout.Space();
+                EditorGUILayout.PropertyField(
+                    settings.FindProperty("m_OverlayButtonDraggingEnabled"),
+                    new GUIContent("Enable Overlay Button Dragging"));
+                EditorGUILayout.HelpBox(
+                    "Allows players to drag the floating Playtolia button between corners or push it into a screen edge to minimize it.",
                     MessageType.Info);
                 EditorGUILayout.Space();
                 

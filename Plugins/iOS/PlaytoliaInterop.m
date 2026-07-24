@@ -437,6 +437,56 @@ void Scaffold_Induce(const char* eventString) {
     }
 }
 
+void Scaffold_SetOverlayButtonAnchor(const char* anchor) {
+    @autoreleasepool {
+        if (anchor == NULL) return;
+        NSString* value = [NSString stringWithUTF8String:anchor];
+        if (value != nil) {
+            [CoreScaffoldStateful.shared setOverlayButtonAnchorByNameAnchor:value];
+        }
+    }
+}
+
+void Scaffold_SetOverlayButtonMinimized(bool minimized) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonMinimizedMinimized:minimized];
+    }
+}
+
+void Scaffold_SetOverlayButtonDraggingEnabled(bool enabled) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonDraggingEnabledEnabled:enabled];
+    }
+}
+
+void Scaffold_SetOverlayButtonBackgroundColor(const char* color) {
+    @autoreleasepool {
+        if (color == NULL) return;
+        NSString* value = [NSString stringWithUTF8String:color];
+        if (value != nil) {
+            [CoreScaffoldStateful.shared setOverlayButtonBackgroundColorColor:value];
+        }
+    }
+}
+
+void Scaffold_SetOverlayButtonOpacity(float opacity) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonOpacityOpacity:opacity];
+    }
+}
+
+void Scaffold_SetOverlayButtonIdleOpacity(float opacity) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonIdleOpacityOpacity:opacity];
+    }
+}
+
+void Scaffold_SetOverlayButtonIdleDelay(long long delayMilliseconds) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonIdleDelayMillisDelayMillis:delayMilliseconds];
+    }
+}
+
 // Subscriptions interop functions
 void Subscriptions_Refresh() {
     @autoreleasepool {

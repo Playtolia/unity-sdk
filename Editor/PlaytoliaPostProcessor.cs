@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEditor;
@@ -10,6 +11,9 @@ namespace Playtolia.Editor
 {
     public static class PlaytoliaPostProcessor
     {
+        private const string FrameworkConfigRelativePath =
+            "Plugins/iOS/core.framework/com.playtolia.sdk-core.bundle/Contents/Resources/files/playtolia_conf.json";
+
         static string template =
             "{\n  \"gameId\": \"@@@co.xreos.playtoliasdk.platform.BuildConstants.GAME_ID@@@\",\n  \"debug\": true,\n  \"enablePersistence\": true\n}";
         
@@ -36,21 +40,59 @@ namespace Playtolia.Editor
         private static void PostProcessIos(BuildTarget buildTarget, string pathToBuiltProject)
         {
             Debug.Log("Post-processing iOS build for Playtolia SDK: " + pathToBuiltProject);
-            var frameworkConfigPath = pathToBuiltProject + "/Frameworks/PlaytoliaSDK/Plugins/iOS/core.framework/com.playtolia.sdk-core.bundle/Contents/Resources/files/playtolia_conf.json";
-            
-            // Check if the shared framework exists
-            if (!System.IO.File.Exists(frameworkConfigPath))
-            {
-                throw new Exception("The shared Playtolia framework does not exist at the specified path: " + frameworkConfigPath);
-            }
+            var frameworkConfigPath = FindFrameworkConfigPath(pathToBuiltProject);
             
             string conf = (new PlaytoliaConfigurationHelper()).SerializeSettings();
             
             // Write the modified contents back to the shared framework
-            System.IO.File.WriteAllText(frameworkConfigPath, conf);
+            File.WriteAllText(frameworkConfigPath, conf);
             
             // Add Sign in with Apple and In-App Purchase entitlements
             AddEntitlementsIfNecessary(buildTarget, pathToBuiltProject);
+        }
+
+        private static string FindFrameworkConfigPath(string pathToBuiltProject)
+        {
+            var frameworksPath = Path.Combine(pathToBuiltProject, "Frameworks");
+            var packageDirectories = new[] { "com.playtolia.sdk", "PlaytoliaSDK" };
+
+            foreach (var packageDirectory in packageDirectories)
+            {
+                var candidate = Path.Combine(
+                    frameworksPath,
+                    packageDirectory,
+                    FrameworkConfigRelativePath
+                );
+
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            if (Directory.Exists(frameworksPath))
+            {
+                var expectedSuffix = FrameworkConfigRelativePath.Replace('\\', '/');
+                foreach (var candidate in Directory.GetFiles(
+                             frameworksPath,
+                             "playtolia_conf.json",
+                             SearchOption.AllDirectories
+                         ))
+                {
+                    if (candidate.Replace('\\', '/').EndsWith(
+                            expectedSuffix,
+                            StringComparison.Ordinal
+                        ))
+                    {
+                        return candidate;
+                    }
+                }
+            }
+
+            throw new FileNotFoundException(
+                "The exported iOS project does not contain the Playtolia framework configuration. " +
+                "Expected it below: " + frameworksPath
+            );
         }
         
         private static void AddEntitlementsIfNecessary(BuildTarget buildTarget, string pathToBuiltProject)
