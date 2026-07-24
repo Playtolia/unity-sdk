@@ -83,16 +83,58 @@
         "integrity": "sha512-xGdU/FVRy05XZf/tyj0UwLqUp/wCYN/tn1EajVDhVarnHvb2fL1xYs03afDrofnb/VpSrYMfU1wiRQ7nBSFT4w==",
         "unpackedSize": 19112673
       }
+    },
+    "1.4.1": {
+      "name": "com.playtolia.sdk",
+      "version": "1.4.1",
+      "displayName": "Playtolia SDK",
+      "description": "Playtolia client SDK for Unity games \u2014 authentication, billing, social, push, ticketing and more. Android + iOS.",
+      "unity": "6000.0",
+      "unityRelease": "32f1",
+      "documentationUrl": "https://github.com/Playtolia/unity-sdk",
+      "changelogUrl": "https://github.com/Playtolia/unity-sdk/blob/main/CHANGELOG.md",
+      "licensesUrl": "https://github.com/Playtolia/unity-sdk/blob/main/LICENSE.md",
+      "keywords": [
+        "Playtolia",
+        "auth",
+        "authentication",
+        "billing",
+        "sdk",
+        "ticketing",
+        "social",
+        "push",
+        "support"
+      ],
+      "author": {
+        "name": "Playtolia",
+        "email": "eray@grainql.com",
+        "url": "https://github.com/Playtolia"
+      },
+      "samples": [
+        {
+          "displayName": "Smoke Test",
+          "description": "Minimal initialization + compat call smoke test used by CI and manual verification.",
+          "path": "Samples~/SmokeTest"
+        }
+      ],
+      "_id": "com.playtolia.sdk@1.4.1",
+      "dist": {
+        "tarball": "https://github.com/Playtolia/unity-sdk/releases/download/v1.4.1/playtolia-sdk-1.4.1.tgz",
+        "shasum": "127fdfdf2434d97c34517f3eb332d642f8aa002f",
+        "integrity": "sha512-R2WVWFKYv4GxdmPM+Nc1AaX7OrifkQ1R+bzXc0ln2vSRL53//1ZTJg91ktKsZQQGbCZF6RH3NGN716W2hk8lGg==",
+        "unpackedSize": 19152452
+      }
     }
   },
   "time": {
     "created": "2026-07-12T17:09:22.000Z",
     "1.3.9": "2026-07-12T17:09:22.000Z",
-    "modified": "2026-07-17T12:40:51.000Z",
-    "1.4.0": "2026-07-17T12:40:51.000Z"
+    "modified": "2026-07-24T15:37:25.000Z",
+    "1.4.0": "2026-07-17T12:40:51.000Z",
+    "1.4.1": "2026-07-24T15:37:25.000Z"
   },
   "dist-tags": {
-    "latest": "1.4.0"
+    "latest": "1.4.1"
   },
   "description": "Playtolia client SDK for Unity games \u2014 authentication, billing, social, push, ticketing and more. Android + iOS.",
   "displayName": "Playtolia SDK",
