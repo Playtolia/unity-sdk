@@ -60,7 +60,66 @@ namespace PlaytoliaSDK.Runtime
         {
             PlaytoliaScaffoldPlatformFunc.SetOverlayButtonIdleDelay(delayMilliseconds);
         }
+
+        /// <summary>
+        /// Set the background opacity used while the button is minimized against an edge.
+        /// Values are clamped to 0..1 natively.
+        /// </summary>
+        public static void SetOverlayButtonMinimizedOpacity(float opacity)
+        {
+            PlaytoliaScaffoldPlatformFunc.SetOverlayButtonMinimizedOpacity(opacity);
+        }
+
+        /// <summary>
+        /// Move the floating button to an arbitrary position. Both values are fractions of the
+        /// button's free travel area: x runs from 0 at the start margin to 1 at the end margin,
+        /// y from 0 at the top margin to 1 at the bottom margin. Values are clamped natively.
+        /// </summary>
+        public static void SetOverlayButtonPosition(float x, float y)
+        {
+            PlaytoliaScaffoldPlatformFunc.SetOverlayButtonPosition(x, y);
+        }
+
+        /// <summary>Choose how the button settles when the player releases a drag.</summary>
+        public static void SetOverlayButtonSnapMode(OverlayButtonSnapMode snapMode)
+        {
+            PlaytoliaScaffoldPlatformFunc.SetOverlayButtonSnapMode(snapMode);
+        }
+
+        /// <summary>
+        /// Enable or disable auto-hide. When enabled the button minimizes itself against its
+        /// current side after a period without interaction, and comes back when the player taps
+        /// or swipes the remaining notch.
+        /// </summary>
+        public static void SetOverlayButtonAutoHideEnabled(bool enabled)
+        {
+            PlaytoliaScaffoldPlatformFunc.SetOverlayButtonAutoHideEnabled(enabled);
+        }
+
+        /// <summary>Set the inactivity delay before auto-hide minimizes the button.</summary>
+        public static void SetOverlayButtonAutoHideDelay(int delayMilliseconds)
+        {
+            PlaytoliaScaffoldPlatformFunc.SetOverlayButtonAutoHideDelay(delayMilliseconds);
+        }
         
+        /// <summary>
+        /// Choose whether the overlay menu and its screens open as a bottom sheet or as a side
+        /// panel. Changing this while the menu is open takes effect the next time it opens.
+        /// </summary>
+        public static void SetOverlayMenuPresentation(OverlayMenuPresentation presentation)
+        {
+            PlaytoliaScaffoldPlatformFunc.SetOverlayMenuPresentation(presentation);
+        }
+
+        /// <summary>
+        /// Set the side panel width as a fraction of the screen, used with
+        /// <see cref="OverlayMenuPresentation.LeftPanel"/>. Clamped to 0.2..1 natively.
+        /// </summary>
+        public static void SetOverlayMenuPanelWidthFraction(float fraction)
+        {
+            PlaytoliaScaffoldPlatformFunc.SetOverlayMenuPanelWidthFraction(fraction);
+        }
+
         public static void Induce(InducedScaffoldEvent inducedEvent)
         {
             PlaytoliaScaffoldPlatformFunc.Induce(inducedEvent);

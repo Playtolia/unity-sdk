@@ -487,6 +487,56 @@ void Scaffold_SetOverlayButtonIdleDelay(long long delayMilliseconds) {
     }
 }
 
+void Scaffold_SetOverlayButtonMinimizedOpacity(float opacity) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonMinimizedOpacityOpacity:opacity];
+    }
+}
+
+void Scaffold_SetOverlayButtonPosition(float x, float y) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonPositionX:x y:y];
+    }
+}
+
+void Scaffold_SetOverlayButtonSnapMode(const char* snapMode) {
+    @autoreleasepool {
+        if (snapMode == NULL) return;
+        NSString* value = [NSString stringWithUTF8String:snapMode];
+        if (value != nil) {
+            [CoreScaffoldStateful.shared setOverlayButtonSnapModeByNameSnapMode:value];
+        }
+    }
+}
+
+void Scaffold_SetOverlayButtonAutoHideEnabled(bool enabled) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonAutoHideEnabledEnabled:enabled];
+    }
+}
+
+void Scaffold_SetOverlayButtonAutoHideDelay(long long delayMilliseconds) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayButtonAutoHideDelayMillisDelayMillis:delayMilliseconds];
+    }
+}
+
+void Scaffold_SetOverlayMenuPresentation(const char* presentation) {
+    @autoreleasepool {
+        if (presentation == NULL) return;
+        NSString* value = [NSString stringWithUTF8String:presentation];
+        if (value != nil) {
+            [CoreScaffoldStateful.shared setOverlayMenuPresentationByNamePresentation:value];
+        }
+    }
+}
+
+void Scaffold_SetOverlayMenuPanelWidthFraction(float fraction) {
+    @autoreleasepool {
+        [CoreScaffoldStateful.shared setOverlayMenuPanelWidthFractionFraction:fraction];
+    }
+}
+
 // Subscriptions interop functions
 void Subscriptions_Refresh() {
     @autoreleasepool {

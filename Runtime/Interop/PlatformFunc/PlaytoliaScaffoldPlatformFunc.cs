@@ -19,6 +19,13 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonOpacity(float opacity);
         [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonIdleOpacity(float opacity);
         [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonIdleDelay(long delayMilliseconds);
+        [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonMinimizedOpacity(float opacity);
+        [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonPosition(float x, float y);
+        [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonSnapMode(string snapMode);
+        [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonAutoHideEnabled(bool enabled);
+        [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonAutoHideDelay(long delayMilliseconds);
+        [DllImport("__Internal")] private static extern void Scaffold_SetOverlayMenuPresentation(string presentation);
+        [DllImport("__Internal")] private static extern void Scaffold_SetOverlayMenuPanelWidthFraction(float fraction);
 #else
         private static void Scaffold_HideOverlay() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static void Scaffold_ShowOverlay() { PlaytoliaInterop.UnsupportedPlatform(); }
@@ -30,6 +37,13 @@ namespace PlaytoliaSDK.Runtime
         private static void Scaffold_SetOverlayButtonOpacity(float opacity) { PlaytoliaInterop.UnsupportedPlatform(); }
         private static void Scaffold_SetOverlayButtonIdleOpacity(float opacity) { PlaytoliaInterop.UnsupportedPlatform(); }
         private static void Scaffold_SetOverlayButtonIdleDelay(long delayMilliseconds) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Scaffold_SetOverlayButtonMinimizedOpacity(float opacity) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Scaffold_SetOverlayButtonPosition(float x, float y) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Scaffold_SetOverlayButtonSnapMode(string snapMode) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Scaffold_SetOverlayButtonAutoHideEnabled(bool enabled) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Scaffold_SetOverlayButtonAutoHideDelay(long delayMilliseconds) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Scaffold_SetOverlayMenuPresentation(string presentation) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Scaffold_SetOverlayMenuPanelWidthFraction(float fraction) { PlaytoliaInterop.UnsupportedPlatform(); }
 #endif
         
         internal static void HideOverlay() {
@@ -136,6 +150,66 @@ namespace PlaytoliaSDK.Runtime
                 () => Scaffold_SetOverlayButtonIdleDelay(nativeDelay),
                 "setOverlayButtonIdleDelayMillis",
                 nativeDelay);
+        }
+
+        internal static void SetOverlayButtonMinimizedOpacity(float opacity)
+        {
+            Invoke(
+                () => Scaffold_SetOverlayButtonMinimizedOpacity(opacity),
+                "setOverlayButtonMinimizedOpacity",
+                opacity);
+        }
+
+        internal static void SetOverlayButtonPosition(float x, float y)
+        {
+            Invoke(
+                () => Scaffold_SetOverlayButtonPosition(x, y),
+                "setOverlayButtonPosition",
+                x, y);
+        }
+
+        internal static void SetOverlayButtonSnapMode(OverlayButtonSnapMode snapMode)
+        {
+            string nativeValue = snapMode.ToString().ToUpperInvariant();
+            Invoke(
+                () => Scaffold_SetOverlayButtonSnapMode(nativeValue),
+                "setOverlayButtonSnapModeByName",
+                nativeValue);
+        }
+
+        internal static void SetOverlayButtonAutoHideEnabled(bool enabled)
+        {
+            Invoke(
+                () => Scaffold_SetOverlayButtonAutoHideEnabled(enabled),
+                "setOverlayButtonAutoHideEnabled",
+                enabled);
+        }
+
+        internal static void SetOverlayButtonAutoHideDelay(int delayMilliseconds)
+        {
+            long nativeDelay = delayMilliseconds;
+            Invoke(
+                () => Scaffold_SetOverlayButtonAutoHideDelay(nativeDelay),
+                "setOverlayButtonAutoHideDelayMillis",
+                nativeDelay);
+        }
+
+        internal static void SetOverlayMenuPresentation(OverlayMenuPresentation presentation)
+        {
+            string nativeValue = System.Text.RegularExpressions.Regex.Replace(
+                presentation.ToString(), "([a-z])([A-Z])", "$1_$2").ToUpperInvariant();
+            Invoke(
+                () => Scaffold_SetOverlayMenuPresentation(nativeValue),
+                "setOverlayMenuPresentationByName",
+                nativeValue);
+        }
+
+        internal static void SetOverlayMenuPanelWidthFraction(float fraction)
+        {
+            Invoke(
+                () => Scaffold_SetOverlayMenuPanelWidthFraction(fraction),
+                "setOverlayMenuPanelWidthFraction",
+                fraction);
         }
 
         private static void Invoke(System.Action iosAction, string androidMethod, params object[] args)

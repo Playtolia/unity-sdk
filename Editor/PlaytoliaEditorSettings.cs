@@ -23,6 +23,23 @@ enum AttributionProvider
     Airbridge
 }
 
+// New modes are appended so the values already serialized in a project's settings asset keep
+// the numbers they were saved with.
+enum OverlayButtonSnapModeSetting
+{
+    Corner,
+    EdgeLeftRight,
+    Free,
+    EdgeTopBottom,
+    EdgeAny
+}
+
+enum OverlayMenuPresentationSetting
+{
+    BottomSheet,
+    LeftPanel
+}
+
 // Create a new type of Settings Asset.
 class PlaytoliaEditorSettings : ScriptableObject
 {
@@ -84,6 +101,10 @@ class PlaytoliaEditorSettings : ScriptableObject
     [SerializeField] private string m_GameId;
     [SerializeField] private bool m_Headless;
     [SerializeField] private bool m_OverlayButtonDraggingEnabled = true;
+    [SerializeField] private OverlayButtonSnapModeSetting m_OverlayButtonSnapMode = OverlayButtonSnapModeSetting.EdgeLeftRight;
+    [SerializeField] private bool m_OverlayButtonAutoHideEnabled;
+    [SerializeField] private int m_OverlayButtonAutoHideDelayMilliseconds = 6000;
+    [SerializeField] private float m_OverlayButtonMinimizedOpacity = 0.72f;
     [SerializeField] private bool m_EnableCustomOrigin;
     [SerializeField] private string m_CustomOrigin;
     [SerializeField] private bool m_AuthEnabled;
@@ -117,6 +138,10 @@ class PlaytoliaEditorSettings : ScriptableObject
     [SerializeField] private string m_TermsOfServiceUrl;
     [SerializeField] private string m_PrivacyPolicyUrl;
     
+    // Overlay Menu
+    [SerializeField] private OverlayMenuPresentationSetting m_OverlayMenuPresentation = OverlayMenuPresentationSetting.BottomSheet;
+    [SerializeField] private float m_OverlayMenuPanelWidthFraction = 0.5f;
+
     // Overlay Menu Visibility
     [SerializeField] private bool m_ShowProfileSection;
     [SerializeField] private bool m_ShowSettingsTile;
@@ -137,6 +162,10 @@ class PlaytoliaEditorSettings : ScriptableObject
             settings.m_GameId = "";
             settings.m_Headless = false;
             settings.m_OverlayButtonDraggingEnabled = true;
+            settings.m_OverlayButtonSnapMode = OverlayButtonSnapModeSetting.EdgeLeftRight;
+            settings.m_OverlayButtonAutoHideEnabled = false;
+            settings.m_OverlayButtonAutoHideDelayMilliseconds = 6000;
+            settings.m_OverlayButtonMinimizedOpacity = 0.72f;
             settings.m_EnableCustomOrigin = false;
             settings.m_CustomOrigin = "";
             settings.m_AuthEnabled = true;
@@ -167,6 +196,10 @@ class PlaytoliaEditorSettings : ScriptableObject
             settings.m_TermsOfServiceUrl = "";
             settings.m_PrivacyPolicyUrl = "";
             
+            // Overlay Menu
+            settings.m_OverlayMenuPresentation = OverlayMenuPresentationSetting.BottomSheet;
+            settings.m_OverlayMenuPanelWidthFraction = 0.5f;
+
             // Overlay Menu Visibility - all enabled by default
             settings.m_ShowProfileSection = true;
             settings.m_ShowSettingsTile = true;
@@ -206,6 +239,30 @@ class PlaytoliaEditorSettings : ScriptableObject
     {
         var settings = GetOrCreateSettings();
         return settings.m_OverlayButtonDraggingEnabled;
+    }
+
+    public static string GetOverlayButtonSnapMode()
+    {
+        var settings = GetOrCreateSettings();
+        return settings.m_OverlayButtonSnapMode.ToString().ToUpperInvariant();
+    }
+
+    public static bool IsOverlayButtonAutoHideEnabled()
+    {
+        var settings = GetOrCreateSettings();
+        return settings.m_OverlayButtonAutoHideEnabled;
+    }
+
+    public static int GetOverlayButtonAutoHideDelayMilliseconds()
+    {
+        var settings = GetOrCreateSettings();
+        return settings.m_OverlayButtonAutoHideDelayMilliseconds;
+    }
+
+    public static float GetOverlayButtonMinimizedOpacity()
+    {
+        var settings = GetOrCreateSettings();
+        return settings.m_OverlayButtonMinimizedOpacity;
     }
 
     public static bool IsCustomOriginEnabled()
@@ -370,6 +427,21 @@ class PlaytoliaEditorSettings : ScriptableObject
         return settings.m_PrivacyPolicyUrl;
     }
     
+    public static string GetOverlayMenuPresentation()
+    {
+        var settings = GetOrCreateSettings();
+        // BottomSheet becomes BOTTOM_SHEET, which is what the native parser expects.
+        return System.Text.RegularExpressions.Regex.Replace(
+            settings.m_OverlayMenuPresentation.ToString(), "([a-z])([A-Z])", "$1_$2")
+            .ToUpperInvariant();
+    }
+
+    public static float GetOverlayMenuPanelWidthFraction()
+    {
+        var settings = GetOrCreateSettings();
+        return settings.m_OverlayMenuPanelWidthFraction;
+    }
+
     // Overlay Menu Visibility Getters
     public static bool IsProfileSectionVisible()
     {
@@ -429,6 +501,14 @@ class PlaytoliaEditorSettings : ScriptableObject
 // Register a SettingsProvider using IMGUI for the drawing framework:
 static class PlaytoliaEditorSettingsIMGUIRegister
 {
+    // Wide enough for the longest label ("Enable Overlay Button Dragging").
+    private const float k_LabelWidth = 230f;
+
+    // Keeps value controls from stretching across the full width of the Project Settings
+    // window, and keeps the help box text at a readable line length on wide displays.
+    private const float k_ContentWidth = 720f;
+    private const float k_LeftMargin = 4f;
+
     [SettingsProvider]
     public static SettingsProvider CreateMyCustomSettingsProvider()
     {
@@ -442,27 +522,70 @@ static class PlaytoliaEditorSettingsIMGUIRegister
             guiHandler = (searchContext) =>
             {
                 var settings = PlaytoliaEditorSettings.GetSerializedSettings();
+
+                // The default label width (~150px) truncates labels like "Enable Overlay Button
+                // Dragging", while the value controls stretch across the whole window. Widen the
+                // labels and cap the content width so the page reads like a normal inspector.
+                float previousLabelWidth = EditorGUIUtility.labelWidth;
+                EditorGUIUtility.labelWidth = k_LabelWidth;
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Space(k_LeftMargin);
+                EditorGUILayout.BeginVertical(GUILayout.MaxWidth(k_ContentWidth));
+
                 EditorGUILayout.Space();
                 // Playtolia.Core
                 EditorGUILayout.LabelField("General", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "Game ID identifies your project with Playtolia; copy it from the dashboard. " +
+                    "Headless makes PlaytoliaUI attach (e.g. from PlaytoliaGameObject) skip all views and controllers, for API-only flows.",
+                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_GameId"), new GUIContent("Game ID"));
                 EditorGUILayout.PropertyField(settings.FindProperty("m_Headless"), new GUIContent("Headless"));
-                EditorGUILayout.HelpBox(
-                    "When enabled, PlaytoliaUI attach (e.g. from PlaytoliaGameObject) will not attach any views or controllers. Use for API-only flows.",
-                    MessageType.Info);
                 EditorGUILayout.Space();
+
+                // Overlay Button
+                EditorGUILayout.LabelField("Overlay Button", EditorStyles.boldLabel);
+                EditorGUILayout.HelpBox(
+                    "The floating Playtolia button that opens the overlay menu. " +
+                    "Dragging lets players move it around the screen or push it into a screen edge to minimize it. " +
+                    "Minimized Opacity is the background opacity of the notch it collapses into, clamped to 0..1. " +
+                    "Auto-Hide minimizes the button against its current side after a period without interaction; " +
+                    "players bring it back by tapping or swiping the remaining notch.",
+                    MessageType.Info);
                 EditorGUILayout.PropertyField(
                     settings.FindProperty("m_OverlayButtonDraggingEnabled"),
                     new GUIContent("Enable Overlay Button Dragging"));
                 EditorGUILayout.HelpBox(
-                    "Allows players to drag the floating Playtolia button between corners or push it into a screen edge to minimize it.",
+                    "Where the button settles when the player lets go. Each edge mode is named " +
+                    "after the edges it allows, and pushing the button past one of them minimizes it.\n" +
+                    "• Edge Left Right: keeps the height it was released at and hugs the nearest side.\n" +
+                    "• Edge Top Bottom: keeps its horizontal position and hugs the top or bottom.\n" +
+                    "• Edge Any: hugs whichever of the four edges is nearest.\n" +
+                    "• Corner: snaps to the nearest of the four corners.\n" +
+                    "• Free: stays exactly where released. Pushing it into a side edge still minimizes it.",
                     MessageType.Info);
+                EditorGUILayout.PropertyField(
+                    settings.FindProperty("m_OverlayButtonSnapMode"),
+                    new GUIContent("Overlay Button Snap Mode"));
+                EditorGUILayout.PropertyField(
+                    settings.FindProperty("m_OverlayButtonMinimizedOpacity"),
+                    new GUIContent("Minimized Opacity"));
+                EditorGUILayout.PropertyField(
+                    settings.FindProperty("m_OverlayButtonAutoHideEnabled"),
+                    new GUIContent("Auto-Hide Overlay Button"));
+                if (settings.FindProperty("m_OverlayButtonAutoHideEnabled").boolValue)
+                {
+                    EditorGUILayout.PropertyField(
+                        settings.FindProperty("m_OverlayButtonAutoHideDelayMilliseconds"),
+                        new GUIContent("Auto-Hide Delay (ms)"));
+                }
                 EditorGUILayout.Space();
-                
+
                 // Custom Origin
+                EditorGUILayout.LabelField("Custom Origin", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_EnableCustomOrigin"),
                     new GUIContent("Use Custom Origin"));
-                
+
                 if (settings.FindProperty("m_EnableCustomOrigin").boolValue)
                 {
                     EditorGUILayout.PropertyField(settings.FindProperty("m_CustomOrigin"),
@@ -480,14 +603,15 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                     MessageType.Warning);
                 // Playtolia.Auth
                 EditorGUILayout.LabelField("Authentication", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "Authentication Required gates the game behind sign-in. With it off, Playtolia does not display the " +
+                    "authentication UI, but you can still use the Playtolia.Auth API to prompt authentication at any time. " +
+                    "The providers below are the sign-in options offered on the authentication screen.",
+                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_AuthEnabled"),
                     new GUIContent("Enable Authentication"));
-                EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(settings.FindProperty("m_AuthRequired"),
                     new GUIContent("Authentication Required"));
-                EditorGUILayout.HelpBox(
-                    "If enabled, users must authenticate before accessing the game. If disabled, Playtolia will not display the authentication UI, but you can still use the Playtolia.Auth API to dynamically prompt authentication.",
-                    MessageType.Info);
                 EditorGUILayout.Space();
 
                 EditorGUILayout.LabelField("Authentication Providers", EditorStyles.boldLabel);
@@ -505,104 +629,108 @@ static class PlaytoliaEditorSettingsIMGUIRegister
 
                 // Legal
                 EditorGUILayout.LabelField("Legal", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(settings.FindProperty("m_TermsOfServiceUrl"),
-                    new GUIContent("Terms of Service URL"));
-                EditorGUILayout.PropertyField(settings.FindProperty("m_PrivacyPolicyUrl"),
-                    new GUIContent("Privacy Policy URL"));
                 EditorGUILayout.HelpBox(
                     "Links shown on the sign-up screen next to the consent checkbox. " +
                     "Leave a field empty to render that label as plain, non-clickable text.",
                     MessageType.Info);
+                EditorGUILayout.PropertyField(settings.FindProperty("m_TermsOfServiceUrl"),
+                    new GUIContent("Terms of Service URL"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_PrivacyPolicyUrl"),
+                    new GUIContent("Privacy Policy URL"));
                 EditorGUILayout.Space();
 
                 // Playtolia.Ticketing
                 EditorGUILayout.LabelField("Support Ticketing", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "Lets players open support tickets and chat with your team from the overlay menu. " +
+                    "Tickets are managed from the Playtolia dashboard.",
+                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_TicketingEnabled"),
                     new GUIContent("Enable Ticketing"));
                 EditorGUILayout.Space();
 
                 // Playtolia.Billing
                 EditorGUILayout.LabelField("Billing and Store", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "In-app purchases and the in-game store, including wallet currencies, entitlements, and subscriptions. " +
+                    "Products and prices are configured on the Playtolia dashboard.",
+                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_BillingEnabled"),
                     new GUIContent("Enable Billing"));
+                EditorGUILayout.Space();
 
                 // Playtolia.Push
                 EditorGUILayout.LabelField("Push Notifications", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "Push notifications use Firebase Cloud Messaging (FCM). Enabling this defines PLAYTOLIA_FIREBASE " +
+                    "and compiles in the Firebase integration, so the Firebase Unity SDK (with Cloud Messaging) and your " +
+                    "Google config files must be present in the project. Leave it off if you don't use push, and the SDK " +
+                    "compiles without any Firebase dependency. Auto Request Push Permission asks for the notification " +
+                    "permission on initialization; with it off you request permission yourself via the Playtolia.Push API.",
+                    MessageType.Info);
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(settings.FindProperty("m_PushEnabled"),
                     new GUIContent("Enable Push Notifications"));
                 bool pushToggleChanged = EditorGUI.EndChangeCheck();
-                EditorGUILayout.HelpBox(
-                    "Push notifications use Firebase Cloud Messaging (FCM). Enabling this defines PLAYTOLIA_FIREBASE " +
-                    "and compiles in the Firebase integration, so the Firebase Unity SDK (with Cloud Messaging) and your " +
-                    "Google config files must be present in the project. Leave it off if you don't use push — the SDK " +
-                    "then compiles without any Firebase dependency. To install FCM, see the Firebase docs for Unity.",
-                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_AutoPushPermissionCheck"),
                     new GUIContent("Auto Request Push Permission"));
-                EditorGUILayout.HelpBox(
-                    "If enabled, the SDK will automatically check and request push notification permission when initialized. " +
-                    "If disabled, you must manually request permission using the Playtolia.Push API.", MessageType.Info);
                 EditorGUILayout.Space();
-                
+
                 // Playtolia.Social
-                
                 EditorGUILayout.LabelField("Social (Friends)", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "Friends, friend requests, and player search, surfaced through the Friends and Chat tiles of the overlay menu.",
+                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_SocialEnabled"),
                     new GUIContent("Enable Social Features"));
                 EditorGUILayout.Space();
 
                 // Crash Capture
                 EditorGUILayout.LabelField("Crash Capture", EditorStyles.whiteLargeLabel);
-                EditorGUILayout.PropertyField(settings.FindProperty("m_CrashCaptureEnabled"),
-                    new GUIContent("Enable Crash Capture"));
                 EditorGUILayout.HelpBox(
                     "Crash Capture helps identify and debug crashes by capturing exception information and logs. " +
                     "When a crash occurs, the user will be prompted on the next launch to share the crash report.",
                     MessageType.Info);
+                EditorGUILayout.PropertyField(settings.FindProperty("m_CrashCaptureEnabled"),
+                    new GUIContent("Enable Crash Capture"));
                 EditorGUILayout.Space();
 
                 // Analytics
                 EditorGUILayout.LabelField("Analytics", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "Analytics uses Grain SDK to track user events and behavior, with the Game ID as the Grain tenant identifier. " +
+                    "Auto-Track Events additionally records key events such as login, logout, purchases, friend activity, and profile changes " +
+                    "without any calls from your game.",
+                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_AnalyticsEnabled"),
                     new GUIContent("Enable Analytics"));
-                EditorGUILayout.HelpBox(
-                    "Analytics uses Grain SDK to track user events and behavior. " +
-                    "The Game ID is automatically used as the Grain tenant identifier.",
-                    MessageType.Info);
-
                 if (settings.FindProperty("m_AnalyticsEnabled").boolValue)
                 {
                     EditorGUILayout.PropertyField(settings.FindProperty("m_AutoTrackEvents"),
                         new GUIContent("Auto-Track Events"));
-                    EditorGUILayout.HelpBox(
-                        "When enabled, the SDK will automatically track key events such as login, logout, purchases, friend activity, and profile changes.",
-                        MessageType.Info);
                 }
                 EditorGUILayout.Space();
 
                 // Attribution
                 EditorGUILayout.LabelField("Attribution", EditorStyles.whiteLargeLabel);
-                EditorGUILayout.PropertyField(settings.FindProperty("m_AttributionProvider"),
-                    new GUIContent("Attribution Provider"));
                 EditorGUILayout.HelpBox(
                     "Marketing attribution provider.\n" +
                     "• None: attribution disabled.\n" +
                     "• System: native store attribution. On Android this reads the Google Play install " +
                     "referrer (UTM parameters, click/install timestamps) with no third-party SDK or token. " +
                     "No effect on iOS.\n" +
-                    "• Airbridge: the Airbridge MDP SDK (requires the Airbridge SDK in your project plus an app name and token).",
+                    "• Airbridge: the Airbridge MDP SDK (requires the Airbridge SDK in your project plus an app name and token).\n" +
+                    "Store as Account Attribute saves the resolved attribution under the 'install_referrer' key " +
+                    "on the player account once the player signs in.",
                     MessageType.Info);
+                EditorGUILayout.PropertyField(settings.FindProperty("m_AttributionProvider"),
+                    new GUIContent("Attribution Provider"));
 
                 var attributionProvider = (AttributionProvider)settings.FindProperty("m_AttributionProvider").enumValueIndex;
                 if (attributionProvider != AttributionProvider.None)
                 {
                     EditorGUILayout.PropertyField(settings.FindProperty("m_AttributionStoreAccountAttribute"),
                         new GUIContent("Store as Account Attribute"));
-                    EditorGUILayout.HelpBox(
-                        "When enabled, resolved attribution (e.g. the install referrer) is saved as a player " +
-                        "account attribute under the 'install_referrer' key once the player signs in.",
-                        MessageType.Info);
                 }
                 if (attributionProvider == AttributionProvider.Airbridge)
                 {
@@ -621,15 +749,33 @@ static class PlaytoliaEditorSettingsIMGUIRegister
 
                 // Signing
                 EditorGUILayout.LabelField("Signing", EditorStyles.whiteLargeLabel);
-                EditorGUILayout.PropertyField(settings.FindProperty("m_AddEntitlements"),
-                    new GUIContent("Add iOS Entitlements"));
                 EditorGUILayout.HelpBox(
                     "If enabled, the Playtolia SDK will automatically add the necessary entitlements to your iOS project. " +
                     "This is required to use Sign in with Apple and push notifications, if you are signing your bundles automatically.",
                     MessageType.Info);
+                EditorGUILayout.PropertyField(settings.FindProperty("m_AddEntitlements"),
+                    new GUIContent("Add iOS Entitlements"));
                 EditorGUILayout.Space();
 
                 // Overlay Menu
+                EditorGUILayout.LabelField("Overlay Menu", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "How the overlay menu and the screens opened from it are presented.\n" +
+                    "• Bottom Sheet: slides up from the bottom of the screen.\n" +
+                    "• Left Panel: slides in from the leading screen edge as a side panel. Its Panel Width Fraction " +
+                    "is the share of the screen it covers (0.5 is half), clamped to 0.2..1.",
+                    MessageType.Info);
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayMenuPresentation"),
+                    new GUIContent("Menu Presentation"));
+                if ((OverlayMenuPresentationSetting)settings.FindProperty("m_OverlayMenuPresentation").enumValueIndex
+                    == OverlayMenuPresentationSetting.LeftPanel)
+                {
+                    EditorGUILayout.PropertyField(
+                        settings.FindProperty("m_OverlayMenuPanelWidthFraction"),
+                        new GUIContent("Panel Width Fraction"));
+                }
+                EditorGUILayout.Space();
+
                 EditorGUILayout.LabelField("Overlay Menu Visibility", EditorStyles.whiteLargeLabel);
                 EditorGUILayout.HelpBox(
                     "Control which tiles and sections are visible in the overlay menu. " +
@@ -657,17 +803,21 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 
                 // Advanced
                 EditorGUILayout.LabelField("Advanced Settings", EditorStyles.whiteLargeLabel);
+                EditorGUILayout.HelpBox(
+                    "Debug Mode enables additional developer tools and overrides the logging level. " +
+                    "Logging Level controls how much Playtolia writes to the log: higher levels are useful for debugging but may impact performance.",
+                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_DebugModeEnabled"),
                     new GUIContent("Enable Debug Mode"));
-                EditorGUILayout.HelpBox("Debug mode enables additional developer tools and overrides logging level.",
-                    MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_LoggingLevel"), new GUIContent("Logging Level"));
-                EditorGUILayout.HelpBox(
-                    "Set the logging level for Playtolia. Higher levels will log more information, which can be useful for debugging but may impact performance.",
-                    MessageType.Info);
                 EditorGUILayout.HelpBox(
                     "Setting the logging level to 'Debug' may leak sensitive information in the logs. Use with caution in production builds.",
                     MessageType.Warning);
+                EditorGUILayout.Space();
+
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.EndHorizontal();
+                EditorGUIUtility.labelWidth = previousLabelWidth;
 
                 settings.ApplyModifiedPropertiesWithoutUndo();
 
@@ -688,6 +838,9 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 "Apple", "Discord", "Guest", "Ticketing", "Play As Guest", "Ticketing Enabled", "Signing",
                 "Entitlements", "Debug", "Debug Mode", "Logging", "Push", "Notifications",
                 "Auto Permission", "Overlay", "Menu", "Visibility", "Profile", "Support",
+                "Overlay Button", "Snap", "Snap Mode", "Auto-Hide", "Auto Hide", "Minimized",
+                "Opacity", "Dragging", "Position",
+                "Presentation", "Bottom Sheet", "Side Panel", "Left Panel", "Panel Width",
                 "Friends", "Chat", "Store", "Rewards", "Tasks", "Leaderboard", "Tiles",
                 "Crash", "Crash Capture", "Error Reporting", "Diagnostics",
                 "Analytics", "Grain", "Tracking", "Events", "Auto-Track",

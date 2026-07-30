@@ -11,6 +11,16 @@ namespace Playtolia.Editor
             SetValue("headless", PlaytoliaEditorSettings.IsHeadlessEnabled());
             SetValue("overlayButtonDraggingEnabled",
                 PlaytoliaEditorSettings.IsOverlayButtonDraggingEnabled());
+            SetValue("overlayButtonSnapMode", PlaytoliaEditorSettings.GetOverlayButtonSnapMode());
+            SetValue("overlayButtonMinimizedOpacity",
+                PlaytoliaEditorSettings.GetOverlayButtonMinimizedOpacity());
+            SetValue("overlayButtonAutoHideEnabled",
+                PlaytoliaEditorSettings.IsOverlayButtonAutoHideEnabled());
+            if (PlaytoliaEditorSettings.IsOverlayButtonAutoHideEnabled())
+            {
+                SetValue("overlayButtonAutoHideDelayMillis",
+                    PlaytoliaEditorSettings.GetOverlayButtonAutoHideDelayMilliseconds());
+            }
             
             // Custom Origin
             if (PlaytoliaEditorSettings.IsCustomOriginEnabled())
@@ -58,6 +68,9 @@ namespace Playtolia.Editor
                 SetValue("airBridgeEnvironment",
                     PlaytoliaEditorSettings.IsAirBridgeSandbox() ? "sandbox" : "production");
             }
+            SetValue("overlayMenuPresentation", PlaytoliaEditorSettings.GetOverlayMenuPresentation());
+            SetValue("overlayMenuPanelWidthFraction",
+                PlaytoliaEditorSettings.GetOverlayMenuPanelWidthFraction());
             SetValue("showProfileSection", PlaytoliaEditorSettings.IsProfileSectionVisible());
             SetValue("showSettingsTile", PlaytoliaEditorSettings.IsSettingsTileVisible());
             SetValue("showSupportTile", PlaytoliaEditorSettings.IsSupportTileVisible());
@@ -101,6 +114,17 @@ namespace Playtolia.Editor
         void SetValue(string key, bool value)
         {
             SetValueRaw(key, value ? "true" : "false");
+        }
+
+        void SetValue(string key, int value)
+        {
+            SetValueRaw(key, value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        // Invariant culture, so a comma decimal separator never produces invalid JSON.
+        void SetValue(string key, float value)
+        {
+            SetValueRaw(key, value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture));
         }
     }
 }
