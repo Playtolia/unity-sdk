@@ -74,14 +74,20 @@ namespace PlaytoliaSDK.Runtime
             return PlaytoliaSubscriptionsPlatformFunc.GetSubscriptionByItemId(itemId);
         }
         
+        /// <summary>Finds the subscription for the product with the given product code.</summary>
+        public static PlayerSubscription GetSubscriptionByItemCode(string itemCode)
+        {
+            return PlaytoliaSubscriptionsPlatformFunc.GetSubscriptionByItemCode(itemCode);
+        }
+        
         public static PlayerSubscription GetSubscriptionByItemSku(string itemSku)
         {
             return PlaytoliaSubscriptionsPlatformFunc.GetSubscriptionByItemSku(itemSku);
         }
         
-        public static PlayerSubscription GetSubscriptionByItem(StoreItem item)
+        public static PlayerSubscription GetSubscriptionByItem(Product product)
         {
-            return PlaytoliaSubscriptionsPlatformFunc.GetSubscriptionByItemId(item.Id);
+            return PlaytoliaSubscriptionsPlatformFunc.GetSubscriptionByItemId(product.Id);
         }
         
         public static List<PlayerSubscription> GetState()

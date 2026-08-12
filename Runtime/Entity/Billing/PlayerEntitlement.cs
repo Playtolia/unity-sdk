@@ -20,8 +20,11 @@ namespace Playtolia.Entity.Billing
         [JsonProperty("grantID")]
         public string GrantId { get; set; }
         
-        [JsonProperty("storeItem")]
-        public StoreItem StoreItem { get; set; }
+        [JsonProperty("product")]
+        public Product Product { get; set; }
+
+        [System.Obsolete("Renamed to Product.")]
+        public Product StoreItem => Product;
         
         public bool IsExpired => DateTime.UtcNow > ExpiresAt;
     }

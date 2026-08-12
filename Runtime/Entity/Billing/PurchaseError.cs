@@ -19,6 +19,10 @@ namespace Playtolia.Entity.Billing
         [JsonProperty("itemId")]
         public string ItemId { get; set; }
 
+        /// <summary>The product code, when known.</summary>
+        [JsonProperty("itemCode")]
+        public string ItemCode { get; set; }
+
         [JsonProperty("itemSku")]
         public string ItemSku { get; set; }
     }

@@ -17,16 +17,20 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern System.IntPtr Store_SearchItems(string query);
         [DllImport("__Internal")] private static extern System.IntPtr Store_GetItemsByType(string type);
         [DllImport("__Internal")] private static extern System.IntPtr Store_GetItemById(string itemId);
+        [DllImport("__Internal")] private static extern System.IntPtr Store_GetItemByCode(string code);
         [DllImport("__Internal")] private static extern System.IntPtr Store_GetItemBySku(string sku);
         [DllImport("__Internal")] private static extern void Store_BeginPurchaseFlow(string itemId, string callbackKey);
+        [DllImport("__Internal")] private static extern void Store_BeginPurchaseFlowByCode(string code, string callbackKey);
 #else
         private static void Store_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static System.IntPtr Store_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Store_SearchItems(string query) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Store_GetItemsByType(string type) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Store_GetItemById(string itemId) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
+        private static System.IntPtr Store_GetItemByCode(string code) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Store_GetItemBySku(string sku) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static void Store_BeginPurchaseFlow(string itemId, string callbackKey) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Store_BeginPurchaseFlowByCode(string code, string callbackKey) { PlaytoliaInterop.UnsupportedPlatform(); }
 #endif
         
         internal static void Refresh()
@@ -45,7 +49,7 @@ namespace PlaytoliaSDK.Runtime
             }
         }
 
-        internal static List<StoreItem> GetState()
+        internal static List<Product> GetState()
         {
             switch (Application.platform)
             {
@@ -66,7 +70,7 @@ namespace PlaytoliaSDK.Runtime
                         Debug.LogWarning("PlaytoliaStorePlatformFunc: GetState returned null or empty value.");
                         return null;
                     }
-                    return JsonConvert.DeserializeObject<List<StoreItem>>(stateString);
+                    return JsonConvert.DeserializeObject<List<Product>>(stateString);
                 case RuntimePlatform.Android:
                     string androidStateString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "serializeState", true);
@@ -76,14 +80,14 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
 
-                    return JsonConvert.DeserializeObject<List<StoreItem>>(androidStateString);
+                    return JsonConvert.DeserializeObject<List<Product>>(androidStateString);
                 default:
                     PlaytoliaInterop.UnsupportedPlatform();
                     return null;
             }
         }
 
-        internal static List<StoreItem> SearchItems(string query)
+        internal static List<Product> SearchItems(string query)
         {
             switch (Application.platform)
             {
@@ -104,7 +108,7 @@ namespace PlaytoliaSDK.Runtime
                         Debug.LogWarning("PlaytoliaStorePlatformFunc: SearchItems returned null or empty value.");
                         return null;
                     }
-                    return JsonConvert.DeserializeObject<List<StoreItem>>(resultString);
+                    return JsonConvert.DeserializeObject<List<Product>>(resultString);
                 case RuntimePlatform.Android:
                     string itemsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "searchItems", true, query);
@@ -114,14 +118,14 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
 
-                    return JsonConvert.DeserializeObject<List<StoreItem>>(itemsString);
+                    return JsonConvert.DeserializeObject<List<Product>>(itemsString);
                 default:
                     PlaytoliaInterop.UnsupportedPlatform();
                     return null;
             }
         }
 
-        internal static List<StoreItem> GetItemsByType(string type)
+        internal static List<Product> GetItemsByType(string type)
         {
             switch (Application.platform)
             {
@@ -142,7 +146,7 @@ namespace PlaytoliaSDK.Runtime
                         Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemsByType returned null or empty value.");
                         return null;
                     }
-                    return JsonConvert.DeserializeObject<List<StoreItem>>(resultString);
+                    return JsonConvert.DeserializeObject<List<Product>>(resultString);
                 case RuntimePlatform.Android:
                     string itemsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "getItemsByType", true, type);
@@ -152,14 +156,14 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
 
-                    return JsonConvert.DeserializeObject<List<StoreItem>>(itemsString);
+                    return JsonConvert.DeserializeObject<List<Product>>(itemsString);
                 default:
                     PlaytoliaInterop.UnsupportedPlatform();
                     return null;
             }
         }
 
-        internal static StoreItem GetItemById(string id)
+        internal static Product GetItemById(string id)
         {
             switch (Application.platform)
             {
@@ -180,7 +184,7 @@ namespace PlaytoliaSDK.Runtime
                         Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemById returned null or empty value.");
                         return null;
                     }
-                    return JsonConvert.DeserializeObject<StoreItem>(resultString);
+                    return JsonConvert.DeserializeObject<Product>(resultString);
                 case RuntimePlatform.Android:
                     string itemString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "getItemById", true, id);
@@ -190,14 +194,52 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
 
-                    return JsonConvert.DeserializeObject<StoreItem>(itemString);
+                    return JsonConvert.DeserializeObject<Product>(itemString);
                 default:
                     PlaytoliaInterop.UnsupportedPlatform();
                     return null;
             }
         }
 
-        internal static StoreItem GetItemBySku(string sku)
+        internal static Product GetItemByCode(string code)
+        {
+            switch (Application.platform)
+            {
+                case RuntimePlatform.IPhonePlayer:
+                    System.IntPtr resultPtr = Store_GetItemByCode(code);
+                    if (resultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemByCode returned null or empty value.");
+                        return null;
+                    }
+
+                    string resultString = Marshal.PtrToStringAnsi(resultPtr);
+                    // Free the native memory
+                    Marshal.FreeHGlobal(resultPtr);
+
+                    if (string.IsNullOrEmpty(resultString))
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemByCode returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<Product>(resultString);
+                case RuntimePlatform.Android:
+                    string itemString =
+                        PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "getItemByCode", true, code);
+                    if (string.IsNullOrEmpty(itemString))
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemByCode returned null or empty value.");
+                        return null;
+                    }
+
+                    return JsonConvert.DeserializeObject<Product>(itemString);
+                default:
+                    PlaytoliaInterop.UnsupportedPlatform();
+                    return null;
+            }
+        }
+
+        internal static Product GetItemBySku(string sku)
         {
             switch (Application.platform)
             {
@@ -218,7 +260,7 @@ namespace PlaytoliaSDK.Runtime
                         Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemBySku returned null or empty value.");
                         return null;
                     }
-                    return JsonConvert.DeserializeObject<StoreItem>(resultString);
+                    return JsonConvert.DeserializeObject<Product>(resultString);
                 case RuntimePlatform.Android:
                     string itemString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "getItemBySku", true, sku);
@@ -228,7 +270,7 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
 
-                    return JsonConvert.DeserializeObject<StoreItem>(itemString);
+                    return JsonConvert.DeserializeObject<Product>(itemString);
                 default:
                     PlaytoliaInterop.UnsupportedPlatform();
                     return null;
@@ -246,6 +288,24 @@ namespace PlaytoliaSDK.Runtime
                     break;
                 case RuntimePlatform.Android:
                     PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "beginPurchaseFlow", false, itemId, callbackKey);
+                    break;
+                default:
+                    PlaytoliaInterop.UnsupportedPlatform();
+                    break;
+            }
+        }
+
+        internal static void BeginPurchaseFlowByCode(string code, Action<string> onSuccess = null, Action<string> onError = null)
+        {
+            var callbackKey = InteropBridge.Register(onSuccess, onError);
+
+            switch (Application.platform)
+            {
+                case RuntimePlatform.IPhonePlayer:
+                    Store_BeginPurchaseFlowByCode(code, callbackKey);
+                    break;
+                case RuntimePlatform.Android:
+                    PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "beginPurchaseFlowByCode", false, code, callbackKey);
                     break;
                 default:
                     PlaytoliaInterop.UnsupportedPlatform();

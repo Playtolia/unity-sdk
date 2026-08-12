@@ -54,6 +54,12 @@ namespace PlaytoliaSDK.Runtime
             return PlaytoliaEntitlementsPlatformFunc.GetEntitlementsByGrantId(grantId);
         }
         
+        /// <summary>Finds the entitlement for the product with the given product code.</summary>
+        public static PlayerEntitlement GetEntitlementByItemCode(string itemCode)
+        {
+            return PlaytoliaEntitlementsPlatformFunc.GetEntitlementByItemCode(itemCode);
+        }
+
         public static PlayerEntitlement GetEntitlementByItemId(string itemId)
         {
             return PlaytoliaEntitlementsPlatformFunc.GetEntitlementByItemId(itemId);

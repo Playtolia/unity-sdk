@@ -5,7 +5,7 @@ namespace Playtolia.Entity.Billing
     public class PurchaseReceipt
     {
         [JsonProperty("item")]
-        public StoreItem Item { get; set; }
+        public Product Item { get; set; }
 
         [JsonProperty("receiptId")]
         public string ReceiptId { get; set; }

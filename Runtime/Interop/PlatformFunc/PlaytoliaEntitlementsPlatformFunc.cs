@@ -16,12 +16,14 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern System.IntPtr Entitlements_GetAllEntitlements();
         [DllImport("__Internal")] private static extern System.IntPtr Entitlements_GetEntitlementByGrantId(string grantId);
         [DllImport("__Internal")] private static extern System.IntPtr Entitlements_GetEntitlementsByGrantId(string grantId);
+        [DllImport("__Internal")] private static extern System.IntPtr Entitlements_GetEntitlementByItemCode(string itemCode);
         [DllImport("__Internal")] private static extern System.IntPtr Entitlements_GetEntitlementByItemId(string itemId);
 #else
         private static void Entitlements_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static System.IntPtr Entitlements_GetAllEntitlements() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Entitlements_GetEntitlementByGrantId(string grantId) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Entitlements_GetEntitlementsByGrantId(string grantId) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
+        private static System.IntPtr Entitlements_GetEntitlementByItemCode(string itemCode) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Entitlements_GetEntitlementByItemId(string itemId) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
 #endif
         
@@ -155,6 +157,43 @@ namespace PlaytoliaSDK.Runtime
             }
         }
 
+        internal static PlayerEntitlement GetEntitlementByItemCode(string itemCode)
+        {
+            switch (Application.platform)
+            {
+                case RuntimePlatform.IPhonePlayer:
+                    System.IntPtr resultPtr = Entitlements_GetEntitlementByItemCode(itemCode);
+                    if (resultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByItemCode returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string resultString = Marshal.PtrToStringAnsi(resultPtr);
+                    // Free the native memory
+                    Marshal.FreeHGlobal(resultPtr);
+                    
+                    if (string.IsNullOrEmpty(resultString))
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByItemCode returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerEntitlement>(resultString);
+                case RuntimePlatform.Android:
+                    string entitlementString =
+                        PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Entitlements, "getEntitlementByItemCode", true, itemCode);
+                    if (string.IsNullOrEmpty(entitlementString))
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByItemCode returned null or empty value.");
+                        return null;
+                    }
+
+                    return JsonConvert.DeserializeObject<PlayerEntitlement>(entitlementString);
+                default:
+                    PlaytoliaInterop.UnsupportedPlatform();
+                    return null;
+            }
+        }
         internal static PlayerEntitlement GetEntitlementByItemId(string itemId)
         {
             switch (Application.platform)

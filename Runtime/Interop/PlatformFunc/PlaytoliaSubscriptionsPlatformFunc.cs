@@ -18,6 +18,7 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern System.IntPtr Subscriptions_GetAllSubscriptions();
         [DllImport("__Internal")] private static extern System.IntPtr Subscriptions_GetSubscriptionById(string subscriptionId);
         [DllImport("__Internal")] private static extern System.IntPtr Subscriptions_GetSubscriptionByItemId(string itemId);
+        [DllImport("__Internal")] private static extern System.IntPtr Subscriptions_GetSubscriptionByItemCode(string itemCode);
         [DllImport("__Internal")] private static extern System.IntPtr Subscriptions_GetSubscriptionByItemSku(string itemSku);
         [DllImport("__Internal")] private static extern System.IntPtr Subscriptions_GetSubscriptionsByType(string type);
         [DllImport("__Internal")] private static extern bool Subscriptions_HasActiveSubscription();
@@ -29,6 +30,7 @@ namespace PlaytoliaSDK.Runtime
         private static System.IntPtr Subscriptions_GetAllSubscriptions() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Subscriptions_GetSubscriptionById(string subscriptionId) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Subscriptions_GetSubscriptionByItemId(string itemId) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
+        private static System.IntPtr Subscriptions_GetSubscriptionByItemCode(string itemCode) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Subscriptions_GetSubscriptionByItemSku(string itemSku) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Subscriptions_GetSubscriptionsByType(string type) { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static bool Subscriptions_HasActiveSubscription() { PlaytoliaInterop.UnsupportedPlatform(); return false; }
@@ -313,6 +315,44 @@ namespace PlaytoliaSDK.Runtime
                     if (string.IsNullOrEmpty(subscriptionString))
                     {
                         Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemId returned null or empty value.");
+                        return null;
+                    }
+
+                    return JsonConvert.DeserializeObject<PlayerSubscription>(subscriptionString);
+                default:
+                    PlaytoliaInterop.UnsupportedPlatform();
+                    return null;
+            }
+        }
+
+        internal static PlayerSubscription GetSubscriptionByItemCode(string itemCode)
+        {
+            switch (Application.platform)
+            {
+                case RuntimePlatform.IPhonePlayer:
+                    System.IntPtr resultPtr = Subscriptions_GetSubscriptionByItemCode(itemCode);
+                    if (resultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemCode returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string resultString = Marshal.PtrToStringAnsi(resultPtr);
+                    // Free the native memory
+                    Marshal.FreeHGlobal(resultPtr);
+                    
+                    if (string.IsNullOrEmpty(resultString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemCode returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerSubscription>(resultString);
+                case RuntimePlatform.Android:
+                    string subscriptionString =
+                        PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "getSubscriptionByItemCode", true, itemCode);
+                    if (string.IsNullOrEmpty(subscriptionString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemCode returned null or empty value.");
                         return null;
                     }
 

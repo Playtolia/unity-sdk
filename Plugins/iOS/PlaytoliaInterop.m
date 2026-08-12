@@ -192,6 +192,35 @@ char* Store_GetItemById(const char* itemId) {
     }
 }
 
+char* Store_GetItemByCode(const char* code) {
+    @autoreleasepool {
+        if (code == NULL) {
+            return NULL;
+        }
+        
+        NSString* nsCode = [NSString stringWithUTF8String:code];
+        if (nsCode == nil) {
+            return NULL;
+        }
+        
+        NSString* resultString = [CoreStoreCompat.shared getItemByCodeCode:nsCode];
+        if (resultString == nil) {
+            return NULL;
+        }
+        
+        const char* utf8String = [resultString UTF8String];
+        if (utf8String == NULL) {
+            return NULL;
+        }
+        
+        // Allocate memory and copy the string
+        size_t length = strlen(utf8String) + 1;
+        char* result = (char*)malloc(length);
+        strcpy(result, utf8String);
+        return result;
+    }
+}
+
 char* Store_GetItemBySku(const char* sku) {
     @autoreleasepool {
         if (sku == NULL) {
@@ -231,6 +260,20 @@ void Store_BeginPurchaseFlow(const char* itemId, const char* callbackKey) {
         NSString* nsCallbackKey = [NSString stringWithUTF8String:callbackKey];
         if (nsItemId != nil && nsCallbackKey != nil) {
             [CoreStoreCompat.shared beginPurchaseFlowItemId:nsItemId callbackKey:nsCallbackKey];
+        }
+    }
+}
+
+void Store_BeginPurchaseFlowByCode(const char* code, const char* callbackKey) {
+    @autoreleasepool {
+        if (code == NULL || callbackKey == NULL) {
+            return;
+        }
+
+        NSString* nsCode = [NSString stringWithUTF8String:code];
+        NSString* nsCallbackKey = [NSString stringWithUTF8String:callbackKey];
+        if (nsCode != nil && nsCallbackKey != nil) {
+            [CoreStoreCompat.shared beginPurchaseFlowByCodeCode:nsCode callbackKey:nsCallbackKey];
         }
     }
 }
@@ -303,6 +346,35 @@ char* Entitlements_GetEntitlementsByGrantId(const char* grantId) {
         }
         
         NSString* resultString = [CoreEntitlementsCompat.shared getEntitlementsByGrantIdGrantId:nsGrantId];
+        if (resultString == nil) {
+            return NULL;
+        }
+        
+        const char* utf8String = [resultString UTF8String];
+        if (utf8String == NULL) {
+            return NULL;
+        }
+        
+        // Allocate memory and copy the string
+        size_t length = strlen(utf8String) + 1;
+        char* result = (char*)malloc(length);
+        strcpy(result, utf8String);
+        return result;
+    }
+}
+
+char* Entitlements_GetEntitlementByItemCode(const char* itemCode) {
+    @autoreleasepool {
+        if (itemCode == NULL) {
+            return NULL;
+        }
+        
+        NSString* nsItemCode = [NSString stringWithUTF8String:itemCode];
+        if (nsItemCode == nil) {
+            return NULL;
+        }
+        
+        NSString* resultString = [CoreEntitlementsCompat.shared getEntitlementByItemCodeItemCode:nsItemCode];
         if (resultString == nil) {
             return NULL;
         }
@@ -645,6 +717,35 @@ char* Subscriptions_GetSubscriptionByItemId(const char* itemId) {
         }
         
         NSString* resultString = [CoreSubscriptionsCompat.shared getSubscriptionByItemIdItemId:nsItemId];
+        if (resultString == nil) {
+            return NULL;
+        }
+        
+        const char* utf8String = [resultString UTF8String];
+        if (utf8String == NULL) {
+            return NULL;
+        }
+        
+        // Allocate memory and copy the string
+        size_t length = strlen(utf8String) + 1;
+        char* result = (char*)malloc(length);
+        strcpy(result, utf8String);
+        return result;
+    }
+}
+
+char* Subscriptions_GetSubscriptionByItemCode(const char* itemCode) {
+    @autoreleasepool {
+        if (itemCode == NULL) {
+            return NULL;
+        }
+        
+        NSString* nsItemCode = [NSString stringWithUTF8String:itemCode];
+        if (nsItemCode == nil) {
+            return NULL;
+        }
+        
+        NSString* resultString = [CoreSubscriptionsCompat.shared getSubscriptionByItemCodeItemCode:nsItemCode];
         if (resultString == nil) {
             return NULL;
         }

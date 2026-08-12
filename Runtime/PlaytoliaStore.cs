@@ -36,7 +36,8 @@ namespace PlaytoliaSDK.Runtime
             Instance.RemoveStateChangedListener(listener);
         }
 
-        public static List<StoreItem> SearchItems(string query)
+        /// <summary>Matches products by name, product code, or SKU.</summary>
+        public static List<Product> SearchProducts(string query)
         {
             return PlaytoliaStorePlatformFunc.SearchItems(query);
         }
@@ -46,58 +47,105 @@ namespace PlaytoliaSDK.Runtime
             PlaytoliaStorePlatformFunc.Refresh();
         }
 
-        public static List<StoreItem> GetItemsByType(StoreItemType type)
+        public static List<Product> GetProductsByType(ProductType type)
         {
             return PlaytoliaStorePlatformFunc.GetItemsByType(type.ToString());
         }
 
-        public static StoreItem GetItemById(string id)
+        /// <summary>
+        /// Looks a product up by the UUID Playtolia generated for it. Prefer
+        /// <see cref="GetProductByCode"/> in game code: the code is the identifier you chose and
+        /// can hardcode, the ID is not.
+        /// </summary>
+        public static Product GetProductById(string id)
         {
             return PlaytoliaStorePlatformFunc.GetItemById(id);
         }
 
-        public static StoreItem GetItemBySku(string sku)
+        /// <summary>
+        /// Looks a product up by the code you assigned it when creating it (for example
+        /// "gold_500"). The code is fixed at creation and identical on every platform.
+        /// </summary>
+        public static Product GetProductByCode(string code)
+        {
+            return PlaytoliaStorePlatformFunc.GetItemByCode(code);
+        }
+
+        /// <summary>
+        /// Looks a product up by its platform store SKU. A SKU only identifies the product on the
+        /// store it is sold through, so the same product has a different SKU on iOS and Android.
+        /// </summary>
+        public static Product GetProductBySku(string sku)
         {
             return PlaytoliaStorePlatformFunc.GetItemBySku(sku);
         }
+
+        [Obsolete("Renamed to SearchProducts.")]
+        public static List<Product> SearchItems(string query) => SearchProducts(query);
+
+        [Obsolete("Renamed to GetProductsByType.")]
+        public static List<Product> GetItemsByType(ProductType type) => GetProductsByType(type);
+
+        [Obsolete("Renamed to GetProductById. This takes the Playtolia-generated UUID, not your product code — use GetProductByCode for that.")]
+        public static Product GetItemById(string id) => GetProductById(id);
+
+        [Obsolete("Renamed to GetProductBySku.")]
+        public static Product GetItemBySku(string sku) => GetProductBySku(sku);
 
         public static void BeginPurchaseFlow(string itemId, Action<PurchaseReceipt> onSuccess = null, Action<PurchaseError> onError = null)
         {
             PlaytoliaStorePlatformFunc.BeginPurchaseFlow(
                 itemId,
-                dataJson =>
-                {
-                    if (onSuccess == null) return;
-                    try
-                    {
-                        var receipt = JsonConvert.DeserializeObject<PurchaseReceipt>(dataJson);
-                        onSuccess.Invoke(receipt);
-                    }
-                    catch (Exception e)
-                    {
-                        UnityEngine.Debug.LogError("PlaytoliaStore: Failed to deserialize PurchaseReceipt: " + e.Message);
-                        onError?.Invoke(new PurchaseError { Code = "UNKNOWN", Message = "Failed to deserialize purchase receipt: " + e.Message });
-                    }
-                },
-                errorJson =>
-                {
-                    if (onError == null) return;
-                    try
-                    {
-                        var error = JsonConvert.DeserializeObject<PurchaseError>(errorJson);
-                        onError.Invoke(error);
-                    }
-                    catch
-                    {
-                        onError.Invoke(new PurchaseError { Code = "UNKNOWN", Message = errorJson });
-                    }
-                }
+                dataJson => DeliverReceipt(dataJson, onSuccess, onError),
+                errorJson => DeliverError(errorJson, onError)
             );
         }
 
-        public static void BeginPurchaseFlow(StoreItem item, Action<PurchaseReceipt> onSuccess = null, Action<PurchaseError> onError = null)
+        private static void DeliverReceipt(string dataJson, Action<PurchaseReceipt> onSuccess, Action<PurchaseError> onError)
         {
-            BeginPurchaseFlow(item.Id, onSuccess, onError);
+            if (onSuccess == null) return;
+            try
+            {
+                var receipt = JsonConvert.DeserializeObject<PurchaseReceipt>(dataJson);
+                onSuccess.Invoke(receipt);
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError("PlaytoliaStore: Failed to deserialize PurchaseReceipt: " + e.Message);
+                onError?.Invoke(new PurchaseError { Code = "UNKNOWN", Message = "Failed to deserialize purchase receipt: " + e.Message });
+            }
+        }
+
+        private static void DeliverError(string errorJson, Action<PurchaseError> onError)
+        {
+            if (onError == null) return;
+            try
+            {
+                var error = JsonConvert.DeserializeObject<PurchaseError>(errorJson);
+                onError.Invoke(error);
+            }
+            catch
+            {
+                onError.Invoke(new PurchaseError { Code = "UNKNOWN", Message = errorJson });
+            }
+        }
+
+        public static void BeginPurchaseFlow(Product product, Action<PurchaseReceipt> onSuccess = null, Action<PurchaseError> onError = null)
+        {
+            BeginPurchaseFlow(product.Id, onSuccess, onError);
+        }
+
+        /// <summary>
+        /// Starts the purchase flow for the product with the given product code — the identifier
+        /// you assigned at creation, not the Playtolia UUID.
+        /// </summary>
+        public static void BeginPurchaseFlowByCode(string code, Action<PurchaseReceipt> onSuccess = null, Action<PurchaseError> onError = null)
+        {
+            PlaytoliaStorePlatformFunc.BeginPurchaseFlowByCode(
+                code,
+                dataJson => DeliverReceipt(dataJson, onSuccess, onError),
+                errorJson => DeliverError(errorJson, onError)
+            );
         }
 
         [Obsolete("Use the overload with Action<PurchaseReceipt> and Action<PurchaseError> for typed callback data.")]
@@ -111,19 +159,22 @@ namespace PlaytoliaSDK.Runtime
         }
 
         [Obsolete("Use the overload with Action<PurchaseReceipt> and Action<PurchaseError> for typed callback data.")]
-        public static void BeginPurchaseFlow(StoreItem item, Action onSuccess, Action<string> onError = null)
+        public static void BeginPurchaseFlow(Product product, Action onSuccess, Action<string> onError = null)
         {
-            BeginPurchaseFlow(item.Id, onSuccess, onError);
+            BeginPurchaseFlow(product.Id, onSuccess, onError);
         }
 
-        public static List<StoreItem> GetState()
+        public static List<Product> GetState()
         {
             return PlaytoliaStorePlatformFunc.GetState();
         }
 
-        public static List<StoreItem> GetItems()
+        public static List<Product> GetProducts()
         {
             return PlaytoliaStorePlatformFunc.GetState();
         }
+
+        [Obsolete("Renamed to GetProducts.")]
+        public static List<Product> GetItems() => GetProducts();
     }
 }
