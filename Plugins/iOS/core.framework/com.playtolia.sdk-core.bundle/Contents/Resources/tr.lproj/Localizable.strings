@@ -105,8 +105,13 @@
 "auth_forgot_password_instruction" = "Kayıtlı e-postanızı girin, şifre sıfırlama bağlantısını gönderelim";
 "auth_action_send_code" = "KOD GÖNDER";
 "auth_verify_code_title" = "AKTİVASYON KODU";
-"auth_verify_code_instruction" = "E-postanıza gönderilen 5 haneli aktivasyon kodunu girin";
+"auth_verify_code_instruction" = "E-postanıza gönderilen %d haneli aktivasyon kodunu girin";
 "auth_action_confirm" = "ONAYLA";
+"auth_action_resend_code" = "KODU TEKRAR GÖNDER";
+"auth_resend_available_in" = "Yeni kodu %s sonra isteyebilirsiniz";
+"auth_code_sent" = "Yeni kod gönderildi";
+"auth_code_expired" = "Bu kodun süresi doldu. Yeni bir kod isteyin.";
+"auth_error_resend_failed" = "Kod tekrar gönderilemedi";
 "auth_reset_password_title" = "YENİ ŞİFRE BELİRLE";
 "auth_reset_password_instruction" = "Yeni şifrenizi girin";
 "auth_field_new_password" = "Yeni şifre";

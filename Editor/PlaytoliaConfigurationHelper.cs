@@ -14,6 +14,28 @@ namespace Playtolia.Editor
             SetValue("overlayButtonSnapMode", PlaytoliaEditorSettings.GetOverlayButtonSnapMode());
             SetValue("overlayButtonMinimizedOpacity",
                 PlaytoliaEditorSettings.GetOverlayButtonMinimizedOpacity());
+            SetValue("overlayButtonBackgroundColor",
+                PlaytoliaEditorSettings.GetOverlayButtonBackgroundColor());
+            var expandedIcon = PlaytoliaEditorSettings.GetOverlayButtonIconDataUri();
+            if (!string.IsNullOrEmpty(expandedIcon)) SetValue("overlayButtonIcon", expandedIcon);
+            var collapsedIcon = PlaytoliaEditorSettings.GetOverlayButtonMinimizedIconDataUri();
+            if (!string.IsNullOrEmpty(collapsedIcon)) SetValue("overlayButtonMinimizedIcon", collapsedIcon);
+            var expandedArtwork = PlaytoliaEditorSettings.GetOverlayButtonExpandedArtworkDataUri();
+            if (!string.IsNullOrEmpty(expandedArtwork)) SetValue("overlayButtonExpandedArtwork", expandedArtwork);
+            var collapsedArtwork = PlaytoliaEditorSettings.GetOverlayButtonMinimizedArtworkDataUri();
+            if (!string.IsNullOrEmpty(collapsedArtwork)) SetValue("overlayButtonMinimizedArtwork", collapsedArtwork);
+            SetValue("overlayButtonArtworkFollowsEdge", PlaytoliaEditorSettings.GetOverlayButtonArtworkFollowsEdge());
+            SetValue("overlayButtonShowIcon", PlaytoliaEditorSettings.GetOverlayButtonShowIcon());
+            SetValue("overlayButtonShowMinimizedIcon", PlaytoliaEditorSettings.GetOverlayButtonShowMinimizedIcon());
+            SetValue("overlayButtonSizeDp", PlaytoliaEditorSettings.GetOverlayButtonSizeDp());
+            SetValue("overlayButtonExpandedLengthDp", PlaytoliaEditorSettings.GetOverlayButtonExpandedLengthDp());
+            SetValue("overlayButtonExpandedThicknessDp", PlaytoliaEditorSettings.GetOverlayButtonExpandedThicknessDp());
+            SetValue("overlayButtonCornerRadiusDp", PlaytoliaEditorSettings.GetOverlayButtonCornerRadiusDp());
+            SetValue("overlayButtonMinimizedLengthDp", PlaytoliaEditorSettings.GetOverlayButtonMinimizedLengthDp());
+            SetValue("overlayButtonMinimizedThicknessDp", PlaytoliaEditorSettings.GetOverlayButtonMinimizedThicknessDp());
+            SetValue("overlayButtonMinimizedCornerRadiusDp", PlaytoliaEditorSettings.GetOverlayButtonMinimizedCornerRadiusDp());
+            SetValue("overlayButtonRespectSafeArea", PlaytoliaEditorSettings.GetOverlayButtonRespectSafeArea());
+            SetValue("overlayButtonSafeAreaPaddingDp", PlaytoliaEditorSettings.GetOverlayButtonSafeAreaPaddingDp());
             SetValue("overlayButtonAutoHideEnabled",
                 PlaytoliaEditorSettings.IsOverlayButtonAutoHideEnabled());
             if (PlaytoliaEditorSettings.IsOverlayButtonAutoHideEnabled())

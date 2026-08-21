@@ -105,6 +105,25 @@ class PlaytoliaEditorSettings : ScriptableObject
     [SerializeField] private bool m_OverlayButtonAutoHideEnabled;
     [SerializeField] private int m_OverlayButtonAutoHideDelayMilliseconds = 6000;
     [SerializeField] private float m_OverlayButtonMinimizedOpacity = 0.72f;
+    [SerializeField] private Color m_OverlayButtonBackgroundColor = new Color32(17, 20, 22, 255);
+    [SerializeField] private Object m_OverlayButtonIcon;
+    [SerializeField] private Object m_OverlayButtonMinimizedIcon;
+    [SerializeField] private Object m_OverlayButtonExpandedArtwork;
+    [SerializeField] private Object m_OverlayButtonMinimizedArtwork;
+    [SerializeField] private bool m_OverlayButtonArtworkFollowsEdge = true;
+    [SerializeField] private bool m_OverlayButtonShowIcon = true;
+    [SerializeField] private bool m_OverlayButtonShowMinimizedIcon = true;
+    [SerializeField, Range(44f, 120f)] private float m_OverlayButtonSizeDp = 64f;
+    [SerializeField, Range(24f, 240f)] private float m_OverlayButtonExpandedLengthDp = 64f;
+    [SerializeField, Range(24f, 160f)] private float m_OverlayButtonExpandedThicknessDp = 64f;
+    // Radii render as sliders capped at 80dp: the thickest allowed button is 160dp, and the
+    // runtime clamps a radius to half the smaller dimension anyway.
+    [SerializeField, Range(0f, 80f)] private float m_OverlayButtonCornerRadiusDp = 16f;
+    [SerializeField, Range(24f, 240f)] private float m_OverlayButtonMinimizedLengthDp = 58f;
+    [SerializeField, Range(24f, 160f)] private float m_OverlayButtonMinimizedThicknessDp = 36f;
+    [SerializeField, Range(0f, 80f)] private float m_OverlayButtonMinimizedCornerRadiusDp = 29f;
+    [SerializeField] private bool m_OverlayButtonRespectSafeArea = true;
+    [SerializeField, Min(0f)] private float m_OverlayButtonSafeAreaPaddingDp = 12f;
     [SerializeField] private bool m_EnableCustomOrigin;
     [SerializeField] private string m_CustomOrigin;
     [SerializeField] private bool m_AuthEnabled;
@@ -166,6 +185,19 @@ class PlaytoliaEditorSettings : ScriptableObject
             settings.m_OverlayButtonAutoHideEnabled = false;
             settings.m_OverlayButtonAutoHideDelayMilliseconds = 6000;
             settings.m_OverlayButtonMinimizedOpacity = 0.72f;
+            settings.m_OverlayButtonBackgroundColor = new Color32(17, 20, 22, 255);
+            settings.m_OverlayButtonShowIcon = true;
+            settings.m_OverlayButtonShowMinimizedIcon = true;
+            settings.m_OverlayButtonArtworkFollowsEdge = true;
+            settings.m_OverlayButtonSizeDp = 64f;
+            settings.m_OverlayButtonExpandedLengthDp = 64f;
+            settings.m_OverlayButtonExpandedThicknessDp = 64f;
+            settings.m_OverlayButtonCornerRadiusDp = 16f;
+            settings.m_OverlayButtonMinimizedLengthDp = 58f;
+            settings.m_OverlayButtonMinimizedThicknessDp = 36f;
+            settings.m_OverlayButtonMinimizedCornerRadiusDp = 29f;
+            settings.m_OverlayButtonRespectSafeArea = true;
+            settings.m_OverlayButtonSafeAreaPaddingDp = 12f;
             settings.m_EnableCustomOrigin = false;
             settings.m_CustomOrigin = "";
             settings.m_AuthEnabled = true;
@@ -263,6 +295,72 @@ class PlaytoliaEditorSettings : ScriptableObject
     {
         var settings = GetOrCreateSettings();
         return settings.m_OverlayButtonMinimizedOpacity;
+    }
+
+    public static string GetOverlayButtonBackgroundColor()
+    {
+        var color = GetOrCreateSettings().m_OverlayButtonBackgroundColor;
+        var rgba = ColorUtility.ToHtmlStringRGBA(color);
+        return "#" + rgba.Substring(6, 2) + rgba.Substring(0, 6);
+    }
+
+    public static string GetOverlayButtonIconDataUri()
+    {
+        return AssetDataUri(GetOrCreateSettings().m_OverlayButtonIcon);
+    }
+
+    public static string GetOverlayButtonMinimizedIconDataUri()
+    {
+        return AssetDataUri(GetOrCreateSettings().m_OverlayButtonMinimizedIcon);
+    }
+
+    public static string GetOverlayButtonExpandedArtworkDataUri() =>
+        AssetDataUri(GetOrCreateSettings().m_OverlayButtonExpandedArtwork);
+
+    public static string GetOverlayButtonMinimizedArtworkDataUri() =>
+        AssetDataUri(GetOrCreateSettings().m_OverlayButtonMinimizedArtwork);
+
+    public static bool GetOverlayButtonArtworkFollowsEdge() =>
+        GetOrCreateSettings().m_OverlayButtonArtworkFollowsEdge;
+
+    public static bool GetOverlayButtonShowIcon() => GetOrCreateSettings().m_OverlayButtonShowIcon;
+    public static bool GetOverlayButtonShowMinimizedIcon() => GetOrCreateSettings().m_OverlayButtonShowMinimizedIcon;
+
+    public static float GetOverlayButtonSizeDp() => GetOrCreateSettings().m_OverlayButtonSizeDp;
+    public static float GetOverlayButtonExpandedLengthDp()
+    {
+        var settings = GetOrCreateSettings();
+        return settings.m_OverlayButtonExpandedLengthDp > 0f
+            ? settings.m_OverlayButtonExpandedLengthDp : settings.m_OverlayButtonSizeDp;
+    }
+
+    public static float GetOverlayButtonExpandedThicknessDp()
+    {
+        var settings = GetOrCreateSettings();
+        return settings.m_OverlayButtonExpandedThicknessDp > 0f
+            ? settings.m_OverlayButtonExpandedThicknessDp : settings.m_OverlayButtonSizeDp;
+    }
+    public static float GetOverlayButtonCornerRadiusDp() => GetOrCreateSettings().m_OverlayButtonCornerRadiusDp;
+    public static float GetOverlayButtonMinimizedLengthDp() => GetOrCreateSettings().m_OverlayButtonMinimizedLengthDp;
+    public static float GetOverlayButtonMinimizedThicknessDp() => GetOrCreateSettings().m_OverlayButtonMinimizedThicknessDp;
+    public static float GetOverlayButtonMinimizedCornerRadiusDp() => GetOrCreateSettings().m_OverlayButtonMinimizedCornerRadiusDp;
+    public static bool GetOverlayButtonRespectSafeArea() => GetOrCreateSettings().m_OverlayButtonRespectSafeArea;
+    public static float GetOverlayButtonSafeAreaPaddingDp() => GetOrCreateSettings().m_OverlayButtonSafeAreaPaddingDp;
+
+    private static string AssetDataUri(Object asset)
+    {
+        if (asset == null) return null;
+        var path = AssetDatabase.GetAssetPath(asset);
+        var extension = Path.GetExtension(path).ToLowerInvariant();
+        if (extension != ".png" && extension != ".jpg" && extension != ".jpeg" && extension != ".svg")
+        {
+            Debug.LogWarning("Playtolia overlay assets must be PNG, JPEG, or SVG files: " + path);
+            return null;
+        }
+        var bytes = File.ReadAllBytes(path);
+        var mime = extension == ".png" ? "image/png" :
+            extension == ".svg" ? "image/svg+xml" : "image/jpeg";
+        return "data:" + mime + ";base64," + System.Convert.ToBase64String(bytes);
     }
 
     public static bool IsCustomOriginEnabled()
@@ -501,6 +599,14 @@ class PlaytoliaEditorSettings : ScriptableObject
 // Register a SettingsProvider using IMGUI for the drawing framework:
 static class PlaytoliaEditorSettingsIMGUIRegister
 {
+    private enum SettingsPage
+    {
+        General,
+        Overlay,
+        Features,
+        DataAndDiagnostics
+    }
+
     // Wide enough for the longest label ("Enable Overlay Button Dragging").
     private const float k_LabelWidth = 230f;
 
@@ -510,15 +616,37 @@ static class PlaytoliaEditorSettingsIMGUIRegister
     private const float k_LeftMargin = 4f;
 
     [SettingsProvider]
-    public static SettingsProvider CreateMyCustomSettingsProvider()
+    public static SettingsProvider CreateGeneralSettingsProvider()
     {
-        // First parameter is the path in the Settings window.
-        // Second parameter is the scope of this setting: it only appears in the Project Settings window.
-        var provider = new SettingsProvider("Project/PlaytoliaEditorIMGUISettings", SettingsScope.Project)
+        return CreateSettingsProvider("Project/Playtolia/General", "General", SettingsPage.General);
+    }
+
+    [SettingsProvider]
+    public static SettingsProvider CreateOverlaySettingsProvider()
+    {
+        return CreateSettingsProvider("Project/Playtolia/Overlay", "Overlay", SettingsPage.Overlay);
+    }
+
+    [SettingsProvider]
+    public static SettingsProvider CreateFeaturesSettingsProvider()
+    {
+        return CreateSettingsProvider("Project/Playtolia/Features", "Features", SettingsPage.Features);
+    }
+
+    [SettingsProvider]
+    public static SettingsProvider CreateDataSettingsProvider()
+    {
+        return CreateSettingsProvider(
+            "Project/Playtolia/Data & Diagnostics",
+            "Data & Diagnostics",
+            SettingsPage.DataAndDiagnostics);
+    }
+
+    private static SettingsProvider CreateSettingsProvider(string path, string label, SettingsPage page)
+    {
+        var provider = new SettingsProvider(path, SettingsScope.Project)
         {
-            // By default the last token of the path is used as display name if no label is provided.
-            label = "Playtolia Settings",
-            // Create the SettingsProvider and initialize its drawing (IMGUI) function in place:
+            label = label,
             guiHandler = (searchContext) =>
             {
                 var settings = PlaytoliaEditorSettings.GetSerializedSettings();
@@ -533,6 +661,10 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 EditorGUILayout.BeginVertical(GUILayout.MaxWidth(k_ContentWidth));
 
                 EditorGUILayout.Space();
+                bool pushToggleChanged = false;
+
+                if (page == SettingsPage.General)
+                {
                 // Playtolia.Core
                 EditorGUILayout.LabelField("General", EditorStyles.whiteLargeLabel);
                 EditorGUILayout.HelpBox(
@@ -542,6 +674,14 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 EditorGUILayout.PropertyField(settings.FindProperty("m_GameId"), new GUIContent("Game ID"));
                 EditorGUILayout.PropertyField(settings.FindProperty("m_Headless"), new GUIContent("Headless"));
                 EditorGUILayout.Space();
+                }
+
+                if (page == SettingsPage.Overlay)
+                {
+                // Live preview first, so every slider below shows its effect without scrolling.
+                EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
+                DrawOverlayButtonPreview(settings);
+                EditorGUILayout.Space();
 
                 // Overlay Button
                 EditorGUILayout.LabelField("Overlay Button", EditorStyles.boldLabel);
@@ -549,6 +689,8 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                     "The floating Playtolia button that opens the overlay menu. " +
                     "Dragging lets players move it around the screen or push it into a screen edge to minimize it. " +
                     "Minimized Opacity is the background opacity of the notch it collapses into, clamped to 0..1. " +
+                    "The normal and collapsed states can use custom PNG/SVG icons, sizes, and corner radii; " +
+                    "a zero corner radius creates a sharp drawer. Safe-area placement uses the OS cutout and system-bar insets. " +
                     "Auto-Hide minimizes the button against its current side after a period without interaction; " +
                     "players bring it back by tapping or swiping the remaining notch.",
                     MessageType.Info);
@@ -570,6 +712,48 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 EditorGUILayout.PropertyField(
                     settings.FindProperty("m_OverlayButtonMinimizedOpacity"),
                     new GUIContent("Minimized Opacity"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonBackgroundColor"),
+                    new GUIContent("Background Color"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonIcon"),
+                    new GUIContent("Expanded Icon (PNG/SVG)"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonShowIcon"),
+                    new GUIContent("Show Expanded Icon"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonMinimizedIcon"),
+                    new GUIContent("Collapsed Icon (PNG/SVG)"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonShowMinimizedIcon"),
+                    new GUIContent("Show Collapsed Icon"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonExpandedLengthDp"),
+                    new GUIContent("Expanded Length Along Edge (dp)"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonExpandedThicknessDp"),
+                    new GUIContent("Expanded Depth From Edge (dp)"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonCornerRadiusDp"),
+                    new GUIContent("Expanded Corner Radius (dp)"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonMinimizedLengthDp"),
+                    new GUIContent("Collapsed Length (dp)"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonMinimizedThicknessDp"),
+                    new GUIContent("Collapsed Thickness (dp)"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonMinimizedCornerRadiusDp"),
+                    new GUIContent("Collapsed Corner Radius (dp)"));
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Complete Custom Artwork", EditorStyles.boldLabel);
+                EditorGUILayout.HelpBox(
+                    "Optional PNG, JPEG, or SVG files here replace the complete generated button for that state. " +
+                    "Artwork is authored horizontally with its fixed edge at the bottom: Length runs along the edge " +
+                    "and Depth runs away from it. Follow Docked Edge rotates it automatically for every dock position without stretching.",
+                    MessageType.Info);
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonExpandedArtwork"),
+                    new GUIContent("Expanded Artwork"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonMinimizedArtwork"),
+                    new GUIContent("Collapsed Artwork"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonArtworkFollowsEdge"),
+                    new GUIContent("Follow Docked Edge"));
+                EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonRespectSafeArea"),
+                    new GUIContent("Respect Device Safe Area"));
+                if (settings.FindProperty("m_OverlayButtonRespectSafeArea").boolValue)
+                {
+                    EditorGUILayout.PropertyField(settings.FindProperty("m_OverlayButtonSafeAreaPaddingDp"),
+                        new GUIContent("Safe Area Padding (dp)"));
+                }
                 EditorGUILayout.PropertyField(
                     settings.FindProperty("m_OverlayButtonAutoHideEnabled"),
                     new GUIContent("Auto-Hide Overlay Button"));
@@ -580,7 +764,10 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                         new GUIContent("Auto-Hide Delay (ms)"));
                 }
                 EditorGUILayout.Space();
+                }
 
+                if (page == SettingsPage.General)
+                {
                 // Custom Origin
                 EditorGUILayout.LabelField("Custom Origin", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_EnableCustomOrigin"),
@@ -596,7 +783,10 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                         MessageType.Warning);
                 }
                 EditorGUILayout.Space();
+                }
 
+                if (page == SettingsPage.Features)
+                {
                 EditorGUILayout.HelpBox(
                     "In order to use Playtolia features you must enable individual modules in the Playtolia settings. Selected modules will be automatically initialized at runtime. " +
                     "You can also use the Playtolia API to dynamically enable, disable, or configure modules at runtime.",
@@ -671,7 +861,7 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(settings.FindProperty("m_PushEnabled"),
                     new GUIContent("Enable Push Notifications"));
-                bool pushToggleChanged = EditorGUI.EndChangeCheck();
+                pushToggleChanged = EditorGUI.EndChangeCheck();
                 EditorGUILayout.PropertyField(settings.FindProperty("m_AutoPushPermissionCheck"),
                     new GUIContent("Auto Request Push Permission"));
                 EditorGUILayout.Space();
@@ -684,7 +874,10 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 EditorGUILayout.PropertyField(settings.FindProperty("m_SocialEnabled"),
                     new GUIContent("Enable Social Features"));
                 EditorGUILayout.Space();
+                }
 
+                if (page == SettingsPage.DataAndDiagnostics)
+                {
                 // Crash Capture
                 EditorGUILayout.LabelField("Crash Capture", EditorStyles.whiteLargeLabel);
                 EditorGUILayout.HelpBox(
@@ -746,7 +939,10 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                         MessageType.Warning);
                 }
                 EditorGUILayout.Space();
+                }
 
+                if (page == SettingsPage.General)
+                {
                 // Signing
                 EditorGUILayout.LabelField("Signing", EditorStyles.whiteLargeLabel);
                 EditorGUILayout.HelpBox(
@@ -756,7 +952,10 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 EditorGUILayout.PropertyField(settings.FindProperty("m_AddEntitlements"),
                     new GUIContent("Add iOS Entitlements"));
                 EditorGUILayout.Space();
+                }
 
+                if (page == SettingsPage.Overlay)
+                {
                 // Overlay Menu
                 EditorGUILayout.LabelField("Overlay Menu", EditorStyles.whiteLargeLabel);
                 EditorGUILayout.HelpBox(
@@ -800,7 +999,10 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 EditorGUILayout.PropertyField(settings.FindProperty("m_ShowLeaderboardTile"),
                     new GUIContent("Show Leaderboard Tile"));
                 EditorGUILayout.Space();
+                }
                 
+                if (page == SettingsPage.General)
+                {
                 // Advanced
                 EditorGUILayout.LabelField("Advanced Settings", EditorStyles.whiteLargeLabel);
                 EditorGUILayout.HelpBox(
@@ -814,6 +1016,7 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                     "Setting the logging level to 'Debug' may leak sensitive information in the logs. Use with caution in production builds.",
                     MessageType.Warning);
                 EditorGUILayout.Space();
+                }
 
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndHorizontal();
@@ -830,25 +1033,316 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 }
             },
 
-            // Populate the search keywords to enable smart search filtering and label highlighting:
-            keywords = new HashSet<string>(new[]
-            {
-                "Playtolia", "Settings", "Game ID", "Headless", "Origin", "Custom Origin", "Base URL", "URL",
-                "Authentication", "Ticketing", "Auth Enabled", "Auth Required", "Google", "Facebook", "Auth",
-                "Apple", "Discord", "Guest", "Ticketing", "Play As Guest", "Ticketing Enabled", "Signing",
-                "Entitlements", "Debug", "Debug Mode", "Logging", "Push", "Notifications",
-                "Auto Permission", "Overlay", "Menu", "Visibility", "Profile", "Support",
-                "Overlay Button", "Snap", "Snap Mode", "Auto-Hide", "Auto Hide", "Minimized",
-                "Opacity", "Dragging", "Position",
-                "Presentation", "Bottom Sheet", "Side Panel", "Left Panel", "Panel Width",
-                "Friends", "Chat", "Store", "Rewards", "Tasks", "Leaderboard", "Tiles",
-                "Crash", "Crash Capture", "Error Reporting", "Diagnostics",
-                "Analytics", "Grain", "Tracking", "Events", "Auto-Track",
-                "Attribution", "Install Referrer", "Referrer", "UTM", "Airbridge", "Provider", "MDP",
-                "Legal", "Terms", "Terms of Service", "Privacy", "Privacy Policy", "ToS"
-            })
+            keywords = GetKeywords(page)
         };
 
         return provider;
+    }
+
+    // Height of the mock screen strip each preview state is drawn against.
+    private const float k_PreviewPanelHeight = 120f;
+
+    // Draws the expanded and collapsed button states side by side, docked against the bottom
+    // of a mock screen strip, using the same background color, dimensions, corner radii,
+    // opacity, icons, and artwork overrides the runtime button is generated from.
+    private static void DrawOverlayButtonPreview(SerializedObject settings)
+    {
+        float expandedLength = settings.FindProperty("m_OverlayButtonExpandedLengthDp").floatValue;
+        float expandedThickness = settings.FindProperty("m_OverlayButtonExpandedThicknessDp").floatValue;
+        float expandedRadius = settings.FindProperty("m_OverlayButtonCornerRadiusDp").floatValue;
+        float minimizedLength = settings.FindProperty("m_OverlayButtonMinimizedLengthDp").floatValue;
+        float minimizedThickness = settings.FindProperty("m_OverlayButtonMinimizedThicknessDp").floatValue;
+        float minimizedRadius = settings.FindProperty("m_OverlayButtonMinimizedCornerRadiusDp").floatValue;
+        float minimizedOpacity = Mathf.Clamp01(settings.FindProperty("m_OverlayButtonMinimizedOpacity").floatValue);
+        Color background = settings.FindProperty("m_OverlayButtonBackgroundColor").colorValue;
+
+        bool showExpandedIcon = settings.FindProperty("m_OverlayButtonShowIcon").boolValue;
+        bool showMinimizedIcon = settings.FindProperty("m_OverlayButtonShowMinimizedIcon").boolValue;
+        Texture expandedIcon =
+            PreviewTexture(settings.FindProperty("m_OverlayButtonIcon").objectReferenceValue);
+        Texture minimizedIcon =
+            PreviewTexture(settings.FindProperty("m_OverlayButtonMinimizedIcon").objectReferenceValue);
+        Texture expandedArtwork =
+            PreviewTexture(settings.FindProperty("m_OverlayButtonExpandedArtwork").objectReferenceValue);
+        Texture minimizedArtwork =
+            PreviewTexture(settings.FindProperty("m_OverlayButtonMinimizedArtwork").objectReferenceValue);
+
+        EditorGUILayout.BeginHorizontal();
+        DrawPreviewPanel(
+            "Expanded",
+            expandedLength, expandedThickness,
+            background, expandedRadius,
+            docked: false,
+            showIcon: showExpandedIcon,
+            icon: expandedIcon,
+            artwork: expandedArtwork);
+        GUILayout.Space(6f);
+        DrawPreviewPanel(
+            "Collapsed",
+            minimizedLength, minimizedThickness,
+            new Color(background.r, background.g, background.b, background.a * minimizedOpacity),
+            minimizedRadius,
+            docked: true,
+            showIcon: showMinimizedIcon,
+            icon: minimizedIcon,
+            artwork: minimizedArtwork);
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.LabelField(
+            "Buttons are shown docked against the bottom edge; SVG icons and artwork preview " +
+            "only when Unity imports them as textures.",
+            EditorStyles.miniLabel);
+    }
+
+    private static void DrawPreviewPanel(
+        string title,
+        float lengthDp,
+        float thicknessDp,
+        Color color,
+        float radiusDp,
+        bool docked,
+        bool showIcon,
+        Texture icon,
+        Texture artwork)
+    {
+        Rect panel = GUILayoutUtility.GetRect(
+            0f, k_PreviewPanelHeight, GUILayout.ExpandWidth(true));
+        if (Event.current.type != EventType.Repaint) return;
+
+        // A mock slice of game screen for the button to sit on.
+        EditorGUI.DrawRect(panel, new Color(0.16f, 0.19f, 0.23f, 1f));
+        GUI.Label(
+            new Rect(panel.x + 6f, panel.y + 4f, panel.width - 12f, 16f),
+            title, EditorStyles.miniBoldLabel);
+
+        // 1dp = 1px, shrunk only when the configured size does not fit the panel.
+        float scale = Mathf.Min(
+            1f,
+            (panel.width - 24f) / Mathf.Max(lengthDp, 1f),
+            (panel.height - 40f) / Mathf.Max(thicknessDp, 1f));
+        float width = lengthDp * scale;
+        float height = thicknessDp * scale;
+        float radius = Mathf.Min(radiusDp * scale, Mathf.Min(width, height) / 2f);
+
+        // Expanded floats just off the edge; collapsed sits flush in it, so only the corners
+        // facing the screen stay rounded, matching the notch the runtime squeezes into.
+        var rect = new Rect(
+            panel.x + (panel.width - width) / 2f,
+            docked ? panel.yMax - height : panel.yMax - height - 12f,
+            width, height);
+        var radii = docked
+            ? new Vector4(radius, radius, 0f, 0f)
+            : new Vector4(radius, radius, radius, radius);
+
+        if (artwork != null)
+        {
+            GUI.DrawTexture(rect, artwork, ScaleMode.StretchToFill, true, 0f, Color.white, Vector4.zero, radii);
+            return;
+        }
+
+        // Mirror the runtime layering: background color, the subtle white sheen gradient the
+        // button paints over it, and the faint white gradient border.
+        GUI.DrawTexture(rect, Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0f, color, Vector4.zero, radii);
+        GUI.DrawTexture(rect, SheenGradientTexture(), ScaleMode.StretchToFill, true, 0f, Color.white, Vector4.zero, radii);
+        GUI.DrawTexture(
+            rect, Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0f,
+            new Color(1f, 1f, 1f, 0.07f), Vector4.one * Mathf.Max(1f, 2f * scale), radii);
+
+        // The show toggles hide the glyph entirely, defaults included, matching the runtime.
+        if (!showIcon) return;
+
+        if (docked)
+        {
+            if (icon != null)
+            {
+                float iconSize = Mathf.Min(width, height) * 0.58f;
+                GUI.DrawTexture(CenteredRect(rect, iconSize), icon, ScaleMode.ScaleToFit, true);
+            }
+            else
+            {
+                DrawChevronUp(rect, scale);
+            }
+        }
+        else
+        {
+            float iconSize = Mathf.Min(width, height) * 0.625f;
+            var iconRect = CenteredRect(rect, iconSize);
+            if (icon != null)
+            {
+                GUI.DrawTexture(iconRect, icon, ScaleMode.ScaleToFit, true);
+            }
+            else
+            {
+                // The runtime falls back to the white Playtolia logomark.
+                GUI.DrawTexture(iconRect, LogomarkTexture(), ScaleMode.ScaleToFit, true);
+            }
+        }
+    }
+
+    private static Rect CenteredRect(Rect container, float size) => new Rect(
+        container.x + (container.width - size) / 2f,
+        container.y + (container.height - size) / 2f,
+        size, size);
+
+    // The collapsed notch's default glyph: a chevron pointing into the screen (up, since the
+    // preview docks against the bottom edge), matching the runtime EdgeChevron.
+    private static void DrawChevronUp(Rect rect, float scale)
+    {
+        float centerX = rect.x + rect.width / 2f;
+        float centerY = rect.y + rect.height / 2f;
+        float arm = 5.3f * scale;
+        var previous = Handles.color;
+        Handles.color = new Color(1f, 1f, 1f, 0.92f);
+        Handles.DrawAAPolyLine(
+            2.5f * scale,
+            new Vector3(centerX - arm, centerY + arm * 0.55f),
+            new Vector3(centerX, centerY - arm * 0.55f),
+            new Vector3(centerX + arm, centerY + arm * 0.55f));
+        Handles.color = previous;
+    }
+
+    private static Texture2D s_SheenGradient;
+
+    // Approximates the runtime's active-state overlay: white fading from 9% at the top of the
+    // button to 1% at the bottom.
+    private static Texture2D SheenGradientTexture()
+    {
+        if (s_SheenGradient == null)
+        {
+            s_SheenGradient = new Texture2D(1, 64, TextureFormat.RGBA32, false)
+            {
+                hideFlags = HideFlags.HideAndDontSave,
+                wrapMode = TextureWrapMode.Clamp,
+            };
+            for (int y = 0; y < 64; y++)
+            {
+                // Texture row 0 is the bottom; the sheen is strongest at the top.
+                float alpha = Mathf.Lerp(0.008f, 0.094f, y / 63f);
+                s_SheenGradient.SetPixel(0, y, new Color(1f, 1f, 1f, alpha));
+            }
+            s_SheenGradient.Apply();
+        }
+        return s_SheenGradient;
+    }
+
+    private static Texture2D s_Logomark;
+
+    // The runtime's default expanded icon is the white Playtolia logomark
+    // (core/src/commonMain/moko-resources/images/logomark.svg). The preview rasterizes the same
+    // even-odd polygon pair so the default button looks like the real one.
+    private static Texture2D LogomarkTexture()
+    {
+        if (s_Logomark != null) return s_Logomark;
+
+        Vector2[] outer =
+        {
+            new Vector2(6.0808f, 5.5f), new Vector2(22.9603f, 5.5f),
+            new Vector2(27.9351f, 9.4977f), new Vector2(29.9192f, 18.6185f),
+            new Vector2(26.6619f, 22.6457f), new Vector2(15.0831f, 22.6457f),
+            new Vector2(16.9785f, 31.5f), new Vector2(11.7665f, 31.5f),
+        };
+        Vector2[] inner =
+        {
+            new Vector2(12.27f, 9.7346f), new Vector2(12.3291f, 10.2381f),
+            new Vector2(14.1356f, 18.4111f), new Vector2(23.4044f, 18.4111f),
+            new Vector2(24.4409f, 17.1379f), new Vector2(23.1083f, 11.0081f),
+            new Vector2(21.5092f, 9.7346f),
+        };
+
+        const int size = 128;
+        const float viewWidth = 36f, viewHeight = 37f;
+        const int samples = 2; // 2x2 supersampling smooths the diagonal strokes.
+        s_Logomark = new Texture2D(size, size, TextureFormat.RGBA32, false)
+        {
+            hideFlags = HideFlags.HideAndDontSave,
+            wrapMode = TextureWrapMode.Clamp,
+        };
+        for (int py = 0; py < size; py++)
+        {
+            for (int px = 0; px < size; px++)
+            {
+                float coverage = 0f;
+                for (int sy = 0; sy < samples; sy++)
+                {
+                    for (int sx = 0; sx < samples; sx++)
+                    {
+                        float x = (px + (sx + 0.5f) / samples) * viewWidth / size;
+                        // SVG y grows downward; texture rows grow upward.
+                        float y = (size - 1 - py + (sy + 0.5f) / samples) * viewHeight / size;
+                        bool filled = InsidePolygon(outer, x, y) ^ InsidePolygon(inner, x, y);
+                        if (filled) coverage += 1f / (samples * samples);
+                    }
+                }
+                s_Logomark.SetPixel(px, py, new Color(1f, 1f, 1f, coverage));
+            }
+        }
+        s_Logomark.Apply();
+        return s_Logomark;
+    }
+
+    private static bool InsidePolygon(Vector2[] polygon, float x, float y)
+    {
+        bool inside = false;
+        for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i++)
+        {
+            if ((polygon[i].y > y) != (polygon[j].y > y) &&
+                x < (polygon[j].x - polygon[i].x) * (y - polygon[i].y) /
+                    (polygon[j].y - polygon[i].y) + polygon[i].x)
+            {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+    // The icon and artwork slots accept any Object so SVGs can be assigned; only assets Unity
+    // imported as textures (PNG/JPEG, or SVG with a texture importer) can be drawn here.
+    private static Texture PreviewTexture(Object asset)
+    {
+        if (asset == null) return null;
+        if (asset is Texture texture) return texture;
+        if (asset is Sprite sprite) return sprite.texture;
+        return AssetPreview.GetAssetPreview(asset);
+    }
+
+    private static HashSet<string> GetKeywords(SettingsPage page)
+    {
+        var keywords = new HashSet<string> { "Playtolia", "Settings" };
+        string[] pageKeywords;
+        switch (page)
+        {
+            case SettingsPage.Overlay:
+                pageKeywords = new[]
+                {
+                    "Overlay", "Button", "Icon", "Artwork", "PNG", "SVG", "Shape", "Color", "Size",
+                    "Safe Area", "Snap", "Auto-Hide", "Menu", "Visibility", "Tiles", "Panel", "Preview"
+                };
+                break;
+            case SettingsPage.Features:
+                pageKeywords = new[]
+                {
+                    "Authentication", "Google", "Facebook", "Apple", "Discord", "Guest", "Legal",
+                    "Terms", "Privacy", "Ticketing", "Billing", "Store", "Push", "Notifications", "Social"
+                };
+                break;
+            case SettingsPage.DataAndDiagnostics:
+                pageKeywords = new[]
+                {
+                    "Crash", "Diagnostics", "Analytics", "Grain", "Tracking", "Attribution",
+                    "Install Referrer", "UTM", "Airbridge"
+                };
+                break;
+            default:
+                pageKeywords = new[]
+                {
+                    "General", "Game ID", "Headless", "Origin", "Signing", "Entitlements", "Debug", "Logging"
+                };
+                break;
+        }
+
+        foreach (var keyword in pageKeywords)
+        {
+            keywords.Add(keyword);
+        }
+        return keywords;
     }
 }

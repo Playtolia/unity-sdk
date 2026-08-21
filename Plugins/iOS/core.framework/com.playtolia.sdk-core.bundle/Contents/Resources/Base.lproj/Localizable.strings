@@ -105,8 +105,13 @@
 "auth_forgot_password_instruction" = "Enter your registered email, we will send you a link to reset password";
 "auth_action_send_code" = "SEND CODE";
 "auth_verify_code_title" = "ACTIVATION CODE";
-"auth_verify_code_instruction" = "Enter 5 digit activation code sent to your email";
+"auth_verify_code_instruction" = "Enter the %d digit activation code sent to your email";
 "auth_action_confirm" = "CONFIRM";
+"auth_action_resend_code" = "RESEND CODE";
+"auth_resend_available_in" = "You can request a new code in %s";
+"auth_code_sent" = "A new code is on its way";
+"auth_code_expired" = "This code has expired. Request a new one.";
+"auth_error_resend_failed" = "Failed to resend the code";
 "auth_reset_password_title" = "SET NEW PASSWORD";
 "auth_reset_password_instruction" = "Enter your new password";
 "auth_field_new_password" = "New password";
