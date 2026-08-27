@@ -3,13 +3,13 @@
     {
       "package": {
         "name": "com.playtolia.sdk",
-        "version": "1.5.0",
+        "version": "1.5.1",
         "description": "Playtolia client SDK for Unity games: authentication, billing, social, push, ticketing and more. Android + iOS.",
-        "date": "2026-08-21T16:33:31.000Z",
+        "date": "2026-08-27T13:47:10.000Z",
         "links": {}
       }
     }
   ],
   "total": 1,
-  "time": "2026-08-21T16:33:31.000Z"
+  "time": "2026-08-27T13:47:10.000Z"
 }
