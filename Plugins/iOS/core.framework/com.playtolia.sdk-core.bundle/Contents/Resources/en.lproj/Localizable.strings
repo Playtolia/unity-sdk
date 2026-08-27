@@ -56,8 +56,11 @@
 "support_field_description" = "Describe your issue in detail";
 "support_field_issue_type" = "Select issue type";
 "support_label_technical_issue" = "Technical Issue";
+"support_label_bug_report" = "Bug Report";
 "support_label_payment_issue" = "Payment Issue";
 "support_label_other_players" = "Other Players";
+"support_label_account" = "Account";
+"support_label_other" = "Other";
 "support_action_submit" = "SUBMIT";
 "support_action_cancel" = "CANCEL";
 "support_action_upload_image" = "UPLOAD IMAGE";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "Pending";
 "support_label_ticket_status_solved" = "Solved";
 "support_chat_input_hint" = "Type something...";
+"support_label_remove_attachment" = "Remove attachment";
+"support_action_attach_image" = "Attach image";
+"support_action_send_chat_message" = "Send message";
+"support_label_attachment_limit" = "Attachment limit reached";
 "switch_label_on" = "ON";
 "switch_label_off" = "OFF";
 "settings_state_changes_saved" = "Changes saved";

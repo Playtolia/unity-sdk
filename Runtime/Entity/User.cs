@@ -9,6 +9,8 @@ namespace Playtolia.Entity
         public string CreatedAt { get; set; }
         [JsonProperty("username")]
         public string Username { get; set; }
+        [JsonProperty("displayName")]
+        public string DisplayName { get; set; }
         [JsonProperty("email")]
         public string Email { get; set; }
         [JsonProperty("ID")]

@@ -56,8 +56,11 @@
 "support_field_description" = "Beschrijf je probleem in detail";
 "support_field_issue_type" = "Selecteer het type probleem";
 "support_label_technical_issue" = "Technisch probleem";
+"support_label_bug_report" = "Bugmelding";
 "support_label_payment_issue" = "Betalingsprobleem";
 "support_label_other_players" = "Andere spelers";
+"support_label_account" = "Account";
+"support_label_other" = "Overig";
 "support_action_submit" = "VERSTUREN";
 "support_action_cancel" = "ANNULEREN";
 "support_action_upload_image" = "AFBEELDING UPLOADEN";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "In behandeling";
 "support_label_ticket_status_solved" = "Opgelost";
 "support_chat_input_hint" = "Typ iets...";
+"support_label_remove_attachment" = "Bijlage verwijderen";
+"support_action_attach_image" = "Afbeelding toevoegen";
+"support_action_send_chat_message" = "Bericht verzenden";
+"support_label_attachment_limit" = "Limiet voor bijlagen bereikt";
 "switch_label_on" = "AAN";
 "switch_label_off" = "UIT";
 "settings_state_changes_saved" = "Wijzigingen opgeslagen";

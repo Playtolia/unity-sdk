@@ -56,8 +56,11 @@
 "support_field_description" = "صف مشكلتك بالتفصيل";
 "support_field_issue_type" = "اختر نوع المشكلة";
 "support_label_technical_issue" = "مشكلة تقنية";
+"support_label_bug_report" = "تقرير عن خلل";
 "support_label_payment_issue" = "مشكلة في الدفع";
 "support_label_other_players" = "لاعبون آخرون";
+"support_label_account" = "الحساب";
+"support_label_other" = "أخرى";
 "support_action_submit" = "إرسال";
 "support_action_cancel" = "إلغاء";
 "support_action_upload_image" = "رفع صورة";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "قيد الانتظار";
 "support_label_ticket_status_solved" = "تم الحل";
 "support_chat_input_hint" = "اكتب شيئًا...";
+"support_label_remove_attachment" = "إزالة المرفق";
+"support_action_attach_image" = "إرفاق صورة";
+"support_action_send_chat_message" = "إرسال الرسالة";
+"support_label_attachment_limit" = "تم بلوغ حد المرفقات";
 "switch_label_on" = "تشغيل";
 "switch_label_off" = "إيقاف";
 "settings_state_changes_saved" = "تم حفظ التغييرات";

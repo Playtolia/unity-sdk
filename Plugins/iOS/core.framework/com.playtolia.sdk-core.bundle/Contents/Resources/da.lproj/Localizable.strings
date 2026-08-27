@@ -56,8 +56,11 @@
 "support_field_description" = "Beskriv dit problem i detaljer";
 "support_field_issue_type" = "Vælg problemtype";
 "support_label_technical_issue" = "Teknisk problem";
+"support_label_bug_report" = "Fejlrapport";
 "support_label_payment_issue" = "Betalingsproblem";
 "support_label_other_players" = "Andre spillere";
+"support_label_account" = "Konto";
+"support_label_other" = "Andet";
 "support_action_submit" = "SEND";
 "support_action_cancel" = "ANNULLER";
 "support_action_upload_image" = "UPLOAD BILLEDE";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "Afventer";
 "support_label_ticket_status_solved" = "Løst";
 "support_chat_input_hint" = "Skriv noget...";
+"support_label_remove_attachment" = "Fjern vedhæftning";
+"support_action_attach_image" = "Vedhæft billede";
+"support_action_send_chat_message" = "Send besked";
+"support_label_attachment_limit" = "Grænsen for vedhæftninger er nået";
 "switch_label_on" = "TIL";
 "switch_label_off" = "FRA";
 "settings_state_changes_saved" = "Ændringer gemt";

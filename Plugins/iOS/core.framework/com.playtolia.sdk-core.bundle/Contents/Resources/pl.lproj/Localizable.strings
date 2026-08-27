@@ -56,8 +56,11 @@
 "support_field_description" = "Opisz swój problem szczegółowo";
 "support_field_issue_type" = "Wybierz typ problemu";
 "support_label_technical_issue" = "Problem techniczny";
+"support_label_bug_report" = "Zgłoszenie błędu";
 "support_label_payment_issue" = "Problem z płatnością";
 "support_label_other_players" = "Inni gracze";
+"support_label_account" = "Konto";
+"support_label_other" = "Inne";
 "support_action_submit" = "WYŚLIJ";
 "support_action_cancel" = "ANULUJ";
 "support_action_upload_image" = "PRZEŚLIJ OBRAZ";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "Oczekujące";
 "support_label_ticket_status_solved" = "Rozwiązane";
 "support_chat_input_hint" = "Napisz coś...";
+"support_label_remove_attachment" = "Usuń załącznik";
+"support_action_attach_image" = "Dołącz obraz";
+"support_action_send_chat_message" = "Wyślij wiadomość";
+"support_label_attachment_limit" = "Osiągnięto limit załączników";
 "switch_label_on" = "WŁ.";
 "switch_label_off" = "WYŁ.";
 "settings_state_changes_saved" = "Zmiany zapisane";

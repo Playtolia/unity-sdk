@@ -56,8 +56,11 @@
 "support_field_description" = "Sorununuzu detaylıca açıklayın";
 "support_field_issue_type" = "Sorun türünü seçin";
 "support_label_technical_issue" = "Teknik Sorun";
+"support_label_bug_report" = "Hata Bildirimi";
 "support_label_payment_issue" = "Ödeme Sorunu";
 "support_label_other_players" = "Diğer Oyuncular";
+"support_label_account" = "Hesap";
+"support_label_other" = "Diğer";
 "support_action_submit" = "GÖNDER";
 "support_action_cancel" = "İPTAL";
 "support_action_upload_image" = "GÖRSEL YÜKLE";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "Beklemede";
 "support_label_ticket_status_solved" = "Çözüldü";
 "support_chat_input_hint" = "Bir şeyler yazın...";
+"support_label_remove_attachment" = "Eki kaldır";
+"support_action_attach_image" = "Görsel ekle";
+"support_action_send_chat_message" = "Mesajı gönder";
+"support_label_attachment_limit" = "Ek sınırına ulaşıldı";
 "switch_label_on" = "AÇIK";
 "switch_label_off" = "KAPALI";
 "settings_state_changes_saved" = "Değişiklikler kaydedildi";

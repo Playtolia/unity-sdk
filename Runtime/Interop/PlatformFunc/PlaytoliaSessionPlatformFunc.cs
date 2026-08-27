@@ -15,12 +15,14 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern void Session_UpdateUsername(string username);
         [DllImport("__Internal")] private static extern void Session_UpdateDisplayName(string displayName);
         [DllImport("__Internal")] private static extern void Session_UpdatePassword(string oldPassword, string newPassword);
+        [DllImport("__Internal")] private static extern void Session_RequestAccountDeletion(string callbackKey);
 #else
         private static void Session_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static System.IntPtr Session_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static void Session_UpdateUsername(string username) { PlaytoliaInterop.UnsupportedPlatform(); }
         private static void Session_UpdateDisplayName(string displayName) { PlaytoliaInterop.UnsupportedPlatform(); }
         private static void Session_UpdatePassword(string oldPassword, string newPassword) { PlaytoliaInterop.UnsupportedPlatform(); }
+        private static void Session_RequestAccountDeletion(string callbackKey) { PlaytoliaInterop.UnsupportedPlatform(); }
 #endif
         
         internal static void Refresh() {
@@ -79,6 +81,24 @@ namespace PlaytoliaSDK.Runtime
                     break;
                 case RuntimePlatform.Android:
                     PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Session, "updatePassword", false, oldPassword, newPassword);
+                    break;
+                default:
+                    PlaytoliaInterop.UnsupportedPlatform();
+                    break;
+            }
+        }
+
+        internal static void RequestAccountDeletion(Action<string> onSuccess = null, Action<string> onError = null)
+        {
+            var callbackKey = InteropBridge.Register(onSuccess, onError);
+
+            switch (Application.platform)
+            {
+                case RuntimePlatform.IPhonePlayer:
+                    Session_RequestAccountDeletion(callbackKey);
+                    break;
+                case RuntimePlatform.Android:
+                    PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Session, "requestAccountDeletion", false, callbackKey);
                     break;
                 default:
                     PlaytoliaInterop.UnsupportedPlatform();

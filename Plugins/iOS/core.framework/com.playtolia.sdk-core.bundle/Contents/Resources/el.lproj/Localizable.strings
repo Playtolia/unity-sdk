@@ -56,8 +56,11 @@
 "support_field_description" = "Περιγράψτε το πρόβλημά σας αναλυτικά";
 "support_field_issue_type" = "Επιλέξτε τύπο προβλήματος";
 "support_label_technical_issue" = "Τεχνικό πρόβλημα";
+"support_label_bug_report" = "Αναφορά σφάλματος";
 "support_label_payment_issue" = "Πρόβλημα πληρωμής";
 "support_label_other_players" = "Άλλοι παίκτες";
+"support_label_account" = "Λογαριασμός";
+"support_label_other" = "Άλλο";
 "support_action_submit" = "ΑΠΟΣΤΟΛΗ";
 "support_action_cancel" = "ΑΚΥΡΩΣΗ";
 "support_action_upload_image" = "ΜΕΤΑΦΟΡΤΩΣΗ ΕΙΚΟΝΑΣ";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "Σε αναμονή";
 "support_label_ticket_status_solved" = "Επιλύθηκε";
 "support_chat_input_hint" = "Γράψτε κάτι...";
+"support_label_remove_attachment" = "Αφαίρεση συνημμένου";
+"support_action_attach_image" = "Επισύναψη εικόνας";
+"support_action_send_chat_message" = "Αποστολή μηνύματος";
+"support_label_attachment_limit" = "Συμπληρώθηκε το όριο συνημμένων";
 "switch_label_on" = "ΕΝΕΡΓΟ";
 "switch_label_off" = "ΑΝΕΝΕΡΓΟ";
 "settings_state_changes_saved" = "Οι αλλαγές αποθηκεύτηκαν";

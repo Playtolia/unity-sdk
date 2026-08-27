@@ -78,6 +78,18 @@ void Session_UpdatePassword(const char* oldPassword, const char* newPassword) {
     }
 }
 
+void Session_RequestAccountDeletion(const char* callbackKey) {
+    @autoreleasepool {
+        if (callbackKey == NULL) {
+            return;
+        }
+        NSString* nsCallbackKey = [NSString stringWithUTF8String:callbackKey];
+        if (nsCallbackKey != nil) {
+            [CoreSessionCompat.shared requestAccountDeletionCallbackKey:nsCallbackKey];
+        }
+    }
+}
+
 // Store interop functions
 void Store_Refresh() {
     @autoreleasepool {

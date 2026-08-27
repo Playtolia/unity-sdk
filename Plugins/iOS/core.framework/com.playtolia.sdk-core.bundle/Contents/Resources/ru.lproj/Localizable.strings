@@ -56,8 +56,11 @@
 "support_field_description" = "Подробно опишите вашу проблему";
 "support_field_issue_type" = "Выберите тип проблемы";
 "support_label_technical_issue" = "Техническая проблема";
+"support_label_bug_report" = "Сообщение об ошибке";
 "support_label_payment_issue" = "Проблема с оплатой";
 "support_label_other_players" = "Другие игроки";
+"support_label_account" = "Аккаунт";
+"support_label_other" = "Другое";
 "support_action_submit" = "ОТПРАВИТЬ";
 "support_action_cancel" = "ОТМЕНА";
 "support_action_upload_image" = "ЗАГРУЗИТЬ ИЗОБРАЖЕНИЕ";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "В ожидании";
 "support_label_ticket_status_solved" = "Решено";
 "support_chat_input_hint" = "Введите сообщение...";
+"support_label_remove_attachment" = "Удалить вложение";
+"support_action_attach_image" = "Прикрепить изображение";
+"support_action_send_chat_message" = "Отправить сообщение";
+"support_label_attachment_limit" = "Достигнут лимит вложений";
 "switch_label_on" = "ВКЛ";
 "switch_label_off" = "ВЫКЛ";
 "settings_state_changes_saved" = "Изменения сохранены";

@@ -56,8 +56,11 @@
 "support_field_description" = "Podrobně popište svůj problém";
 "support_field_issue_type" = "Vyberte typ problému";
 "support_label_technical_issue" = "Technický problém";
+"support_label_bug_report" = "Hlášení chyby";
 "support_label_payment_issue" = "Platební problém";
 "support_label_other_players" = "Ostatní hráči";
+"support_label_account" = "Účet";
+"support_label_other" = "Jiné";
 "support_action_submit" = "ODESLAT";
 "support_action_cancel" = "ZRUŠIT";
 "support_action_upload_image" = "NAHRÁT OBRÁZEK";
@@ -66,6 +69,10 @@
 "support_label_ticket_status_pending" = "Čeká se";
 "support_label_ticket_status_solved" = "Vyřešeno";
 "support_chat_input_hint" = "Napište něco...";
+"support_label_remove_attachment" = "Odebrat přílohu";
+"support_action_attach_image" = "Přiložit obrázek";
+"support_action_send_chat_message" = "Odeslat zprávu";
+"support_label_attachment_limit" = "Dosažen limit příloh";
 "switch_label_on" = "ZAPNUTO";
 "switch_label_off" = "VYPNUTO";
 "settings_state_changes_saved" = "Změny byly uloženy";
