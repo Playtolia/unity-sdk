@@ -23,6 +23,24 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern System.IntPtr Subscriptions_GetSubscriptionsByType(string type);
         [DllImport("__Internal")] private static extern bool Subscriptions_HasActiveSubscription();
         [DllImport("__Internal")] private static extern bool Subscriptions_HasActiveSubscriptionOfType(string type);
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Subscriptions_Refresh();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Subscriptions_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Subscriptions_GetActiveSubscriptions();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Subscriptions_GetAllSubscriptions();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Subscriptions_GetSubscriptionById(byte[] subscriptionId);
+        private static System.IntPtr Subscriptions_GetSubscriptionById(string subscriptionId) { return Subscriptions_GetSubscriptionById(NativeStrings.ToUtf8(subscriptionId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Subscriptions_GetSubscriptionByItemId(byte[] itemId);
+        private static System.IntPtr Subscriptions_GetSubscriptionByItemId(string itemId) { return Subscriptions_GetSubscriptionByItemId(NativeStrings.ToUtf8(itemId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Subscriptions_GetSubscriptionByItemCode(byte[] itemCode);
+        private static System.IntPtr Subscriptions_GetSubscriptionByItemCode(string itemCode) { return Subscriptions_GetSubscriptionByItemCode(NativeStrings.ToUtf8(itemCode)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Subscriptions_GetSubscriptionByItemSku(byte[] itemSku);
+        private static System.IntPtr Subscriptions_GetSubscriptionByItemSku(string itemSku) { return Subscriptions_GetSubscriptionByItemSku(NativeStrings.ToUtf8(itemSku)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Subscriptions_GetSubscriptionsByType(byte[] type);
+        private static System.IntPtr Subscriptions_GetSubscriptionsByType(string type) { return Subscriptions_GetSubscriptionsByType(NativeStrings.ToUtf8(type)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] private static extern bool Subscriptions_HasActiveSubscription();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] private static extern bool Subscriptions_HasActiveSubscriptionOfType(byte[] type);
+        private static bool Subscriptions_HasActiveSubscriptionOfType(string type) { return Subscriptions_HasActiveSubscriptionOfType(NativeStrings.ToUtf8(type)); }
 #else
         private static void Subscriptions_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static System.IntPtr Subscriptions_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
@@ -42,6 +60,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Subscriptions_Refresh();
                     break;
                 case RuntimePlatform.Android:
@@ -75,6 +94,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<PlayerSubscription>>(stateString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winStatePtr = Subscriptions_SerializeState();
+                    if (winStatePtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+                    
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<PlayerSubscription>>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string stateString2 =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "serializeState", true);
@@ -113,6 +150,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<PlayerSubscription>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Subscriptions_GetSubscriptionById(id);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionById returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionById returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerSubscription>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string subscriptionString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "getSubscriptionById", true, id);
@@ -151,6 +206,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<PlayerSubscription>>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Subscriptions_GetActiveSubscriptions();
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetActiveSubscriptions returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetActiveSubscriptions returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<PlayerSubscription>>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string subscriptionsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "getActiveSubscriptions", true);
@@ -189,6 +262,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<PlayerSubscription>>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Subscriptions_GetSubscriptionsByType(type);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionsByType returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionsByType returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<PlayerSubscription>>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string subscriptionsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "getSubscriptionsByType", true, type);
@@ -210,6 +301,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     return Subscriptions_HasActiveSubscription();
                 case RuntimePlatform.Android:
                     string resultString =
@@ -232,6 +324,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     return Subscriptions_HasActiveSubscriptionOfType(type);
                 case RuntimePlatform.Android:
                     string resultString =
@@ -271,6 +364,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<PlayerSubscription>>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Subscriptions_GetAllSubscriptions();
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetAllSubscriptions returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetAllSubscriptions returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<PlayerSubscription>>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string subscriptionsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "getAllSubscriptions", true);
@@ -309,6 +420,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<PlayerSubscription>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Subscriptions_GetSubscriptionByItemId(itemId);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemId returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemId returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerSubscription>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string subscriptionString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "getSubscriptionByItemId", true, itemId);
@@ -347,6 +476,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<PlayerSubscription>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Subscriptions_GetSubscriptionByItemCode(itemCode);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemCode returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemCode returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerSubscription>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string subscriptionString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "getSubscriptionByItemCode", true, itemCode);
@@ -385,6 +532,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<PlayerSubscription>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Subscriptions_GetSubscriptionByItemSku(itemSku);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemSku returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaSubscriptionsPlatformFunc: GetSubscriptionByItemSku returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerSubscription>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string subscriptionString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Subscriptions, "getSubscriptionByItemSku", true, itemSku);

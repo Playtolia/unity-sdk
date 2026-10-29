@@ -27,6 +27,7 @@
 "settings_profile_info_title" = "معلومات الملف الشخصي";
 "settings_action_upload" = "رفع";
 "settings_state_uploading" = "جارٍ الرفع...";
+"common_state_uploading_progress" = "جارٍ الرفع %d%%";
 "settings_field_username" = "اسم المستخدم";
 "settings_field_display_name" = "الاسم الظاهر";
 "settings_field_name" = "الاسم";

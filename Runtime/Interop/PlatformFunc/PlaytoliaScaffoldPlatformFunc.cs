@@ -26,6 +26,29 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern void Scaffold_SetOverlayButtonAutoHideDelay(long delayMilliseconds);
         [DllImport("__Internal")] private static extern void Scaffold_SetOverlayMenuPresentation(string presentation);
         [DllImport("__Internal")] private static extern void Scaffold_SetOverlayMenuPanelWidthFraction(float fraction);
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_HideOverlay();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_ShowOverlay();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_Induce(byte[] eventString);
+        private static void Scaffold_Induce(string eventString) { Scaffold_Induce(NativeStrings.ToUtf8(eventString)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonAnchor(byte[] anchor);
+        private static void Scaffold_SetOverlayButtonAnchor(string anchor) { Scaffold_SetOverlayButtonAnchor(NativeStrings.ToUtf8(anchor)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonMinimized([MarshalAs(UnmanagedType.I1)] bool minimized);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonDraggingEnabled([MarshalAs(UnmanagedType.I1)] bool enabled);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonBackgroundColor(byte[] color);
+        private static void Scaffold_SetOverlayButtonBackgroundColor(string color) { Scaffold_SetOverlayButtonBackgroundColor(NativeStrings.ToUtf8(color)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonOpacity(float opacity);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonIdleOpacity(float opacity);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonIdleDelay(long delayMilliseconds);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonMinimizedOpacity(float opacity);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonPosition(float x, float y);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonSnapMode(byte[] snapMode);
+        private static void Scaffold_SetOverlayButtonSnapMode(string snapMode) { Scaffold_SetOverlayButtonSnapMode(NativeStrings.ToUtf8(snapMode)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonAutoHideEnabled([MarshalAs(UnmanagedType.I1)] bool enabled);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayButtonAutoHideDelay(long delayMilliseconds);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayMenuPresentation(byte[] presentation);
+        private static void Scaffold_SetOverlayMenuPresentation(string presentation) { Scaffold_SetOverlayMenuPresentation(NativeStrings.ToUtf8(presentation)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Scaffold_SetOverlayMenuPanelWidthFraction(float fraction);
 #else
         private static void Scaffold_HideOverlay() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static void Scaffold_ShowOverlay() { PlaytoliaInterop.UnsupportedPlatform(); }
@@ -50,6 +73,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Scaffold_HideOverlay();
                     break;
                 case RuntimePlatform.Android:
@@ -65,6 +89,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Scaffold_ShowOverlay();
                     break;
                 case RuntimePlatform.Android:
@@ -81,6 +106,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Scaffold_Induce(inducedEvent.ToString());
                     break;
                 case RuntimePlatform.Android:
@@ -217,6 +243,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     iosAction();
                     break;
                 case RuntimePlatform.Android:

@@ -37,6 +37,12 @@ public class PlaytoliaGameObject : MonoBehaviour
     void Start()
     {
 #if PLAYTOLIA_FIREBASE
+        // Firebase push is mobile-only; its desktop native library isn't shipped in Windows players.
+        if (Application.platform == RuntimePlatform.WindowsPlayer)
+        {
+            Debug.Log("PlaytoliaGameObject: Push notifications are not available on Windows; skipping Firebase.");
+        }
+        else
         Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
         {
             var dependencyStatus = task.Result;
@@ -102,6 +108,10 @@ public class PlaytoliaGameObject : MonoBehaviour
                     Debug.LogException(e);
                 }
 
+                break;
+            case RuntimePlatform.WindowsPlayer:
+                Debug.Log("PlaytoliaGameObject: Initializing Playtolia for Windows");
+                Playtolia.Desktop.PlaytoliaDesktopOverlay.Initialize();
                 break;
             default:
                 Debug.LogWarning("PlaytoliaGameObject: Unsupported platform for Playtolia initialization");

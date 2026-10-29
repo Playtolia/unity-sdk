@@ -22,6 +22,24 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern void Social_CancelFriendRequest(string requestId);
         [DllImport("__Internal")] private static extern void Social_RemoveFriend(string friendshipId);
         [DllImport("__Internal")] private static extern IntPtr Social_SearchPlayers(string query);
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Social_Refresh();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Social_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Social_GetFriends();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Social_GetIncomingFriendRequests();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Social_GetOutgoingFriendRequests();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Social_SendFriendRequest(byte[] playerId);
+        private static void Social_SendFriendRequest(string playerId) { Social_SendFriendRequest(NativeStrings.ToUtf8(playerId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Social_AcceptFriendRequest(byte[] requestId);
+        private static void Social_AcceptFriendRequest(string requestId) { Social_AcceptFriendRequest(NativeStrings.ToUtf8(requestId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Social_RejectFriendRequest(byte[] requestId);
+        private static void Social_RejectFriendRequest(string requestId) { Social_RejectFriendRequest(NativeStrings.ToUtf8(requestId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Social_CancelFriendRequest(byte[] requestId);
+        private static void Social_CancelFriendRequest(string requestId) { Social_CancelFriendRequest(NativeStrings.ToUtf8(requestId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Social_RemoveFriend(byte[] friendshipId);
+        private static void Social_RemoveFriend(string friendshipId) { Social_RemoveFriend(NativeStrings.ToUtf8(friendshipId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Social_SearchPlayers(byte[] query);
+        private static IntPtr Social_SearchPlayers(string query) { return Social_SearchPlayers(NativeStrings.ToUtf8(query)); }
 #else
         private static void Social_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static IntPtr Social_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return IntPtr.Zero; }
@@ -41,6 +59,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Social_Refresh();
                     break;
                 case RuntimePlatform.Android:
@@ -74,6 +93,24 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<SocialState>(stateString);
                     
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winStatePtr = Social_SerializeState();
+                    if (winStatePtr == IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSocialPlatformFunc: GetState returned null or empty value.");
+                        return new SocialState();
+                    }
+                    
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+                    
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaSocialPlatformFunc: GetState returned null or empty value.");
+                        return new SocialState();
+                    }
+                    return JsonConvert.DeserializeObject<SocialState>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string androidStateString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Social, "serializeState", true);
                     if (string.IsNullOrEmpty(androidStateString))
@@ -109,6 +146,22 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<List<Friend>>(friendsString);
                     
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winFriendsPtr = Social_GetFriends();
+                    if (winFriendsPtr == IntPtr.Zero)
+                    {
+                        return new List<Friend>();
+                    }
+                    
+                    string winFriendsString = NativeStrings.TakeUtf8(winFriendsPtr);
+                    
+                    if (string.IsNullOrEmpty(winFriendsString))
+                    {
+                        return new List<Friend>();
+                    }
+                    return JsonConvert.DeserializeObject<List<Friend>>(winFriendsString);
+                }
                 case RuntimePlatform.Android:
                     string androidFriendsString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Social, "getFriends", true);
                     if (string.IsNullOrEmpty(androidFriendsString))
@@ -143,6 +196,22 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<List<FriendRequest>>(requestsString);
                     
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winRequestsPtr = Social_GetIncomingFriendRequests();
+                    if (winRequestsPtr == IntPtr.Zero)
+                    {
+                        return new List<FriendRequest>();
+                    }
+                    
+                    string winRequestsString = NativeStrings.TakeUtf8(winRequestsPtr);
+                    
+                    if (string.IsNullOrEmpty(winRequestsString))
+                    {
+                        return new List<FriendRequest>();
+                    }
+                    return JsonConvert.DeserializeObject<List<FriendRequest>>(winRequestsString);
+                }
                 case RuntimePlatform.Android:
                     string androidRequestsString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Social, "getIncomingFriendRequests", true);
                     if (string.IsNullOrEmpty(androidRequestsString))
@@ -177,6 +246,22 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<List<FriendRequest>>(requestsString);
                     
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winRequestsPtr = Social_GetOutgoingFriendRequests();
+                    if (winRequestsPtr == IntPtr.Zero)
+                    {
+                        return new List<FriendRequest>();
+                    }
+                    
+                    string winRequestsString = NativeStrings.TakeUtf8(winRequestsPtr);
+                    
+                    if (string.IsNullOrEmpty(winRequestsString))
+                    {
+                        return new List<FriendRequest>();
+                    }
+                    return JsonConvert.DeserializeObject<List<FriendRequest>>(winRequestsString);
+                }
                 case RuntimePlatform.Android:
                     string androidRequestsString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Social, "getOutgoingFriendRequests", true);
                     if (string.IsNullOrEmpty(androidRequestsString))
@@ -196,6 +281,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Social_SendFriendRequest(playerId);
                     break;
                 case RuntimePlatform.Android:
@@ -212,6 +298,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Social_AcceptFriendRequest(requestId);
                     break;
                 case RuntimePlatform.Android:
@@ -228,6 +315,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Social_RejectFriendRequest(requestId);
                     break;
                 case RuntimePlatform.Android:
@@ -244,6 +332,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Social_CancelFriendRequest(requestId);
                     break;
                 case RuntimePlatform.Android:
@@ -260,6 +349,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Social_RemoveFriend(friendshipId);
                     break;
                 case RuntimePlatform.Android:
@@ -282,6 +372,14 @@ namespace PlaytoliaSDK.Runtime
                     Marshal.FreeHGlobal(resultPtr);
                     if (string.IsNullOrEmpty(resultString)) return new List<Player>();
                     return JsonConvert.DeserializeObject<List<Player>>(resultString) ?? new List<Player>();
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winResultPtr = Social_SearchPlayers(query);
+                    if (winResultPtr == IntPtr.Zero) return new List<Player>();
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    if (string.IsNullOrEmpty(winResultString)) return new List<Player>();
+                    return JsonConvert.DeserializeObject<List<Player>>(winResultString) ?? new List<Player>();
+                }
                 case RuntimePlatform.Android:
                     string androidResult = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Social, "searchPlayers", true, query);
                     if (string.IsNullOrEmpty(androidResult)) return new List<Player>();

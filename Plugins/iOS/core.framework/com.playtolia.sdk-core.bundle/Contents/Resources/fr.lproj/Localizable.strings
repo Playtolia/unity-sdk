@@ -27,6 +27,7 @@
 "settings_profile_info_title" = "INFORMATIONS DU PROFIL";
 "settings_action_upload" = "TÉLÉVERSER";
 "settings_state_uploading" = "TÉLÉVERSEMENT...";
+"common_state_uploading_progress" = "TÉLÉVERSEMENT %d %%";
 "settings_field_username" = "Nom d'utilisateur";
 "settings_field_display_name" = "Nom affiché";
 "settings_field_name" = "Nom";

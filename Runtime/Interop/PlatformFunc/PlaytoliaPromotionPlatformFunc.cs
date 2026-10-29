@@ -16,6 +16,13 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern void Promotion_RequestReviewAfterPositiveEvent(bool force);
         [DllImport("__Internal")] private static extern bool Promotion_CanRequestReview();
         [DllImport("__Internal")] private static extern void Promotion_SetNeverAskAgain(bool value);
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Promotion_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Promotion_ConfigureReview(int minSessions, int minDaysSinceInstall, int maxRequestsPerYear, int cooldownDays);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Promotion_RequestReview([MarshalAs(UnmanagedType.I1)] bool force);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Promotion_RequestReviewAfterPositiveEvent([MarshalAs(UnmanagedType.I1)] bool force);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] private static extern bool Promotion_CanRequestReview();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Promotion_SetNeverAskAgain([MarshalAs(UnmanagedType.I1)] bool value);
 #else
         private static IntPtr Promotion_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return IntPtr.Zero; }
         private static void Promotion_ConfigureReview(int minSessions, int minDaysSinceInstall, int maxRequestsPerYear, int cooldownDays) { PlaytoliaInterop.UnsupportedPlatform(); }
@@ -47,6 +54,24 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<PromotionState>(stateString);
 
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winStatePtr = Promotion_SerializeState();
+                    if (winStatePtr == IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaPromotionPlatformFunc: GetState returned null or empty value.");
+                        return new PromotionState();
+                    }
+
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaPromotionPlatformFunc: GetState returned null or empty value.");
+                        return new PromotionState();
+                    }
+                    return JsonConvert.DeserializeObject<PromotionState>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string androidStateString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Promotion, "serializeState", true);
                     if (string.IsNullOrEmpty(androidStateString))
@@ -67,6 +92,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Promotion_ConfigureReview(minSessions, minDaysSinceInstall, maxRequestsPerYear, cooldownDays);
                     break;
                 case RuntimePlatform.Android:
@@ -83,6 +109,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Promotion_RequestReview(force);
                     break;
                 case RuntimePlatform.Android:
@@ -99,6 +126,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Promotion_RequestReviewAfterPositiveEvent(force);
                     break;
                 case RuntimePlatform.Android:
@@ -115,6 +143,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     return Promotion_CanRequestReview();
                 case RuntimePlatform.Android:
                     string result = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Promotion, "canRequestReview", true);
@@ -130,6 +159,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Promotion_SetNeverAskAgain(value);
                     break;
                 case RuntimePlatform.Android:

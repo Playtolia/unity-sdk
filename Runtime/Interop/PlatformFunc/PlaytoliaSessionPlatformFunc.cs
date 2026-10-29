@@ -16,6 +16,17 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern void Session_UpdateDisplayName(string displayName);
         [DllImport("__Internal")] private static extern void Session_UpdatePassword(string oldPassword, string newPassword);
         [DllImport("__Internal")] private static extern void Session_RequestAccountDeletion(string callbackKey);
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Session_Refresh();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Session_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Session_UpdateUsername(byte[] username);
+        private static void Session_UpdateUsername(string username) { Session_UpdateUsername(NativeStrings.ToUtf8(username)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Session_UpdateDisplayName(byte[] displayName);
+        private static void Session_UpdateDisplayName(string displayName) { Session_UpdateDisplayName(NativeStrings.ToUtf8(displayName)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Session_UpdatePassword(byte[] oldPassword, byte[] newPassword);
+        private static void Session_UpdatePassword(string oldPassword, string newPassword) { Session_UpdatePassword(NativeStrings.ToUtf8(oldPassword), NativeStrings.ToUtf8(newPassword)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Session_RequestAccountDeletion(byte[] callbackKey);
+        private static void Session_RequestAccountDeletion(string callbackKey) { Session_RequestAccountDeletion(NativeStrings.ToUtf8(callbackKey)); }
 #else
         private static void Session_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static System.IntPtr Session_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
@@ -29,6 +40,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Session_Refresh();
                     break;
                 case RuntimePlatform.Android:
@@ -45,6 +57,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Session_UpdateUsername(username);
                     break;
                 case RuntimePlatform.Android:
@@ -61,6 +74,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Session_UpdateDisplayName(displayName);
                     break;
                 case RuntimePlatform.Android:
@@ -77,6 +91,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Session_UpdatePassword(oldPassword, newPassword);
                     break;
                 case RuntimePlatform.Android:
@@ -95,6 +110,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Session_RequestAccountDeletion(callbackKey);
                     break;
                 case RuntimePlatform.Android:
@@ -128,6 +144,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<User>(stateString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winStatePtr = Session_SerializeState();
+                    if (winStatePtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaSessionPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+                    
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaSessionPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<User>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string androidStateString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Session, "serializeState", true);
                     if (string.IsNullOrEmpty(androidStateString))

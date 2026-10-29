@@ -27,6 +27,7 @@
 "settings_profile_info_title" = "INFORMACE O PROFILU";
 "settings_action_upload" = "NAHRÁT";
 "settings_state_uploading" = "NAHRÁVÁNÍ...";
+"common_state_uploading_progress" = "NAHRÁVÁNÍ %d%%";
 "settings_field_username" = "Uživatelské jméno";
 "settings_field_display_name" = "Zobrazované jméno";
 "settings_field_name" = "Jméno";

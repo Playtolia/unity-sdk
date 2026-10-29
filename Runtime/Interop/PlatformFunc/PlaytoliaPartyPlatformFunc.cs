@@ -29,6 +29,31 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern void Party_AcceptInvite(string inviteId);
         [DllImport("__Internal")] private static extern void Party_StartMatchmaking(string queueName);
         [DllImport("__Internal")] private static extern void Party_CancelMatchmaking();
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_Refresh();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Party_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Party_GetCurrentParty();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Party_GetMembers();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] private static extern bool Party_IsLeader();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] private static extern bool Party_IsInParty();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] private static extern bool Party_IsMatchmaking();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Party_GetMatchmakingTicket();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_CreateParty(int maxSize, [MarshalAs(UnmanagedType.I1)] bool generateJoinCode);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_JoinByCode(byte[] joinCode);
+        private static void Party_JoinByCode(string joinCode) { Party_JoinByCode(NativeStrings.ToUtf8(joinCode)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_LeaveParty();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_KickMember(byte[] memberId);
+        private static void Party_KickMember(string memberId) { Party_KickMember(NativeStrings.ToUtf8(memberId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_TransferLeadership(byte[] newLeaderId);
+        private static void Party_TransferLeadership(string newLeaderId) { Party_TransferLeadership(NativeStrings.ToUtf8(newLeaderId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_SetReady([MarshalAs(UnmanagedType.I1)] bool ready);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_InvitePlayer(byte[] playerId);
+        private static void Party_InvitePlayer(string playerId) { Party_InvitePlayer(NativeStrings.ToUtf8(playerId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_AcceptInvite(byte[] inviteId);
+        private static void Party_AcceptInvite(string inviteId) { Party_AcceptInvite(NativeStrings.ToUtf8(inviteId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_StartMatchmaking(byte[] queueName);
+        private static void Party_StartMatchmaking(string queueName) { Party_StartMatchmaking(NativeStrings.ToUtf8(queueName)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Party_CancelMatchmaking();
 #else
         private static void Party_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static IntPtr Party_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return IntPtr.Zero; }
@@ -55,6 +80,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_Refresh();
                     break;
                 case RuntimePlatform.Android:
@@ -88,6 +114,24 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<PartyState>(stateString);
                     
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winStatePtr = Party_SerializeState();
+                    if (winStatePtr == IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaPartyPlatformFunc: GetState returned null or empty value.");
+                        return new PartyState();
+                    }
+                    
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+                    
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaPartyPlatformFunc: GetState returned null or empty value.");
+                        return new PartyState();
+                    }
+                    return JsonConvert.DeserializeObject<PartyState>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string androidStateString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Party, "serializeState", true);
                     if (string.IsNullOrEmpty(androidStateString))
@@ -123,6 +167,22 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<Party>(partyString);
                     
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winPartyPtr = Party_GetCurrentParty();
+                    if (winPartyPtr == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+                    
+                    string winPartyString = NativeStrings.TakeUtf8(winPartyPtr);
+                    
+                    if (string.IsNullOrEmpty(winPartyString))
+                    {
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<Party>(winPartyString);
+                }
                 case RuntimePlatform.Android:
                     string androidPartyString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Party, "getCurrentParty", true);
                     if (string.IsNullOrEmpty(androidPartyString))
@@ -157,6 +217,22 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<List<PartyMember>>(membersString);
                     
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winMembersPtr = Party_GetMembers();
+                    if (winMembersPtr == IntPtr.Zero)
+                    {
+                        return new List<PartyMember>();
+                    }
+                    
+                    string winMembersString = NativeStrings.TakeUtf8(winMembersPtr);
+                    
+                    if (string.IsNullOrEmpty(winMembersString))
+                    {
+                        return new List<PartyMember>();
+                    }
+                    return JsonConvert.DeserializeObject<List<PartyMember>>(winMembersString);
+                }
                 case RuntimePlatform.Android:
                     string androidMembersString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Party, "getMembers", true);
                     if (string.IsNullOrEmpty(androidMembersString))
@@ -176,6 +252,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     return Party_IsLeader();
                 case RuntimePlatform.Android:
                     string result = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Party, "isLeader", true);
@@ -191,6 +268,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     return Party_IsInParty();
                 case RuntimePlatform.Android:
                     string result = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Party, "isInParty", true);
@@ -206,6 +284,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     return Party_IsMatchmaking();
                 case RuntimePlatform.Android:
                     string result = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Party, "isMatchmaking", true);
@@ -236,6 +315,22 @@ namespace PlaytoliaSDK.Runtime
                     }
                     return JsonConvert.DeserializeObject<MatchmakingTicket>(ticketString);
                     
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winTicketPtr = Party_GetMatchmakingTicket();
+                    if (winTicketPtr == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+                    
+                    string winTicketString = NativeStrings.TakeUtf8(winTicketPtr);
+                    
+                    if (string.IsNullOrEmpty(winTicketString))
+                    {
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<MatchmakingTicket>(winTicketString);
+                }
                 case RuntimePlatform.Android:
                     string androidTicketString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Party, "getMatchmakingTicket", true);
                     if (string.IsNullOrEmpty(androidTicketString))
@@ -255,6 +350,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_CreateParty(maxSize, generateJoinCode);
                     break;
                 case RuntimePlatform.Android:
@@ -271,6 +367,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_JoinByCode(joinCode);
                     break;
                 case RuntimePlatform.Android:
@@ -287,6 +384,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_LeaveParty();
                     break;
                 case RuntimePlatform.Android:
@@ -303,6 +401,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_KickMember(memberId);
                     break;
                 case RuntimePlatform.Android:
@@ -319,6 +418,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_TransferLeadership(newLeaderId);
                     break;
                 case RuntimePlatform.Android:
@@ -335,6 +435,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_SetReady(ready);
                     break;
                 case RuntimePlatform.Android:
@@ -351,6 +452,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_InvitePlayer(playerId);
                     break;
                 case RuntimePlatform.Android:
@@ -367,6 +469,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_AcceptInvite(inviteId);
                     break;
                 case RuntimePlatform.Android:
@@ -383,6 +486,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_StartMatchmaking(queueName);
                     break;
                 case RuntimePlatform.Android:
@@ -399,6 +503,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Party_CancelMatchmaking();
                     break;
                 case RuntimePlatform.Android:

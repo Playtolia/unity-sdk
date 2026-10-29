@@ -19,6 +19,18 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern System.IntPtr Wallet_GetCurrencyByCode(string code);
         [DllImport("__Internal")] private static extern System.IntPtr Wallet_GetWalletForCurrencyWithId(string currencyId);
         [DllImport("__Internal")] private static extern System.IntPtr Wallet_GetWalletForCurrencyWithCode(string code);
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Wallet_Refresh();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Wallet_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Wallet_GetCurrencies();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Wallet_GetCurrencyById(byte[] currencyId);
+        private static System.IntPtr Wallet_GetCurrencyById(string currencyId) { return Wallet_GetCurrencyById(NativeStrings.ToUtf8(currencyId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Wallet_GetCurrencyByCode(byte[] code);
+        private static System.IntPtr Wallet_GetCurrencyByCode(string code) { return Wallet_GetCurrencyByCode(NativeStrings.ToUtf8(code)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Wallet_GetWalletForCurrencyWithId(byte[] currencyId);
+        private static System.IntPtr Wallet_GetWalletForCurrencyWithId(string currencyId) { return Wallet_GetWalletForCurrencyWithId(NativeStrings.ToUtf8(currencyId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Wallet_GetWalletForCurrencyWithCode(byte[] code);
+        private static System.IntPtr Wallet_GetWalletForCurrencyWithCode(string code) { return Wallet_GetWalletForCurrencyWithCode(NativeStrings.ToUtf8(code)); }
 #else
         private static void Wallet_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static System.IntPtr Wallet_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
@@ -34,6 +46,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Wallet_Refresh();
                     break;
                 case RuntimePlatform.Android:
@@ -67,6 +80,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<WalletItem>>(stateString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winStatePtr = Wallet_SerializeState();
+                    if (winStatePtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+                    
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<WalletItem>>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string stateString2 =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Wallet, "serializeState", true);
@@ -105,6 +136,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<WalletItem>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Wallet_GetWalletForCurrencyWithId(id);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetWalletForCurrencyWithId returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetWalletForCurrencyWithId returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<WalletItem>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string itemString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Wallet, "getWalletForCurrencyWithId", true, id);
@@ -143,6 +192,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<WalletItem>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Wallet_GetWalletForCurrencyWithCode(code);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetWalletForCurrencyWithCode returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetWalletForCurrencyWithCode returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<WalletItem>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string itemString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Wallet, "getWalletForCurrencyWithCode", true, code);
@@ -181,6 +248,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<Currency>>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Wallet_GetCurrencies();
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetCurrencies returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetCurrencies returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<Currency>>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string currenciesString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Wallet, "getCurrencies", true);
@@ -219,6 +304,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<Currency>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Wallet_GetCurrencyById(id);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetCurrencyById returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetCurrencyById returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<Currency>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string currencyString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Wallet, "getCurrencyById", true, id);
@@ -257,6 +360,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<Currency>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Wallet_GetCurrencyByCode(code);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetCurrencyByCode returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaWalletPlatformFunc: GetCurrencyByCode returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<Currency>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string currencyString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Wallet, "getCurrencyByCode", true, code);

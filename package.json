@@ -1,8 +1,8 @@
 {
     "name": "com.playtolia.sdk",
-    "version": "1.5.3",
+    "version": "1.6.0-rc.1",
     "displayName": "Playtolia SDK",
-    "description": "Playtolia client SDK for Unity games: authentication, billing, social, push, ticketing and more. Android + iOS.",
+    "description": "Playtolia client SDK for Unity games: authentication, billing, social, push, ticketing and more. Android, iOS and Windows (x64 players).",
     "unity": "6000.0",
     "unityRelease": "32f1",
     "documentationUrl": "https://github.com/Playtolia/unity-sdk",

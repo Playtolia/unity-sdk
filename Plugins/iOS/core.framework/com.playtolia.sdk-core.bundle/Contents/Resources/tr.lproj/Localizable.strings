@@ -27,6 +27,7 @@
 "settings_profile_info_title" = "PROFİL BİLGİLERİ";
 "settings_action_upload" = "YÜKLE";
 "settings_state_uploading" = "YÜKLENİYOR...";
+"common_state_uploading_progress" = "YÜKLENİYOR %%%d";
 "settings_field_username" = "Kullanıcı Adı";
 "settings_field_display_name" = "Görünen Ad";
 "settings_field_name" = "Ad";

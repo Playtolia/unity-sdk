@@ -14,6 +14,13 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern System.IntPtr Analytics_GetDeviceId();
         [DllImport("__Internal")] private static extern System.IntPtr Analytics_GetSessionId();
         [DllImport("__Internal")] private static extern void Analytics_Flush();
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Analytics_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Analytics_Track(byte[] eventName, byte[] propertiesJson);
+        private static void Analytics_Track(string eventName, string propertiesJson) { Analytics_Track(NativeStrings.ToUtf8(eventName), NativeStrings.ToUtf8(propertiesJson)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Analytics_GetDeviceId();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Analytics_GetSessionId();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Analytics_Flush();
 #else
         private static System.IntPtr Analytics_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static void Analytics_Track(string eventName, string propertiesJson) { PlaytoliaInterop.UnsupportedPlatform(); }
@@ -43,6 +50,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<AnalyticsState>(stateString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winStatePtr = Analytics_SerializeState();
+                    if (winStatePtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaAnalyticsPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaAnalyticsPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<AnalyticsState>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string androidStateString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Analytics, "serializeState", true);
@@ -63,6 +88,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Analytics_Track(eventName, propertiesJson);
                     break;
                 case RuntimePlatform.Android:
@@ -84,6 +110,13 @@ namespace PlaytoliaSDK.Runtime
                     string deviceId = Marshal.PtrToStringAnsi(ptr);
                     Marshal.FreeHGlobal(ptr);
                     return deviceId;
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winPtr = Analytics_GetDeviceId();
+                    if (winPtr == System.IntPtr.Zero) return null;
+                    string winDeviceId = NativeStrings.TakeUtf8(winPtr);
+                    return winDeviceId;
+                }
                 case RuntimePlatform.Android:
                     return PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Analytics, "getDeviceId", true);
                 default:
@@ -102,6 +135,13 @@ namespace PlaytoliaSDK.Runtime
                     string sessionId = Marshal.PtrToStringAnsi(ptr);
                     Marshal.FreeHGlobal(ptr);
                     return sessionId;
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winPtr = Analytics_GetSessionId();
+                    if (winPtr == System.IntPtr.Zero) return null;
+                    string winSessionId = NativeStrings.TakeUtf8(winPtr);
+                    return winSessionId;
+                }
                 case RuntimePlatform.Android:
                     return PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Analytics, "getSessionId", true);
                 default:
@@ -115,6 +155,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Analytics_Flush();
                     break;
                 case RuntimePlatform.Android:

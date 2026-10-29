@@ -18,6 +18,17 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern System.IntPtr Entitlements_GetEntitlementsByGrantId(string grantId);
         [DllImport("__Internal")] private static extern System.IntPtr Entitlements_GetEntitlementByItemCode(string itemCode);
         [DllImport("__Internal")] private static extern System.IntPtr Entitlements_GetEntitlementByItemId(string itemId);
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Entitlements_Refresh();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Entitlements_GetAllEntitlements();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Entitlements_GetEntitlementByGrantId(byte[] grantId);
+        private static System.IntPtr Entitlements_GetEntitlementByGrantId(string grantId) { return Entitlements_GetEntitlementByGrantId(NativeStrings.ToUtf8(grantId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Entitlements_GetEntitlementsByGrantId(byte[] grantId);
+        private static System.IntPtr Entitlements_GetEntitlementsByGrantId(string grantId) { return Entitlements_GetEntitlementsByGrantId(NativeStrings.ToUtf8(grantId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Entitlements_GetEntitlementByItemCode(byte[] itemCode);
+        private static System.IntPtr Entitlements_GetEntitlementByItemCode(string itemCode) { return Entitlements_GetEntitlementByItemCode(NativeStrings.ToUtf8(itemCode)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Entitlements_GetEntitlementByItemId(byte[] itemId);
+        private static System.IntPtr Entitlements_GetEntitlementByItemId(string itemId) { return Entitlements_GetEntitlementByItemId(NativeStrings.ToUtf8(itemId)); }
 #else
         private static void Entitlements_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static System.IntPtr Entitlements_GetAllEntitlements() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
@@ -32,6 +43,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Entitlements_Refresh();
                     break;
                 case RuntimePlatform.Android:
@@ -65,6 +77,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<PlayerEntitlement>>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Entitlements_GetAllEntitlements();
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetAllEntitlements returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetAllEntitlements returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<PlayerEntitlement>>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string entitlementsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Entitlements, "getAllEntitlements", true);
@@ -103,6 +133,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<PlayerEntitlement>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Entitlements_GetEntitlementByGrantId(grantId);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByGrantId returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByGrantId returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerEntitlement>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string entitlementString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Entitlements, "getEntitlementByGrantId", true, grantId);
@@ -141,6 +189,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<PlayerEntitlement>>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Entitlements_GetEntitlementsByGrantId(grantId);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementsByGrantId returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementsByGrantId returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<PlayerEntitlement>>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string entitlementsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Entitlements, "getEntitlementsByGrantId", true, grantId);
@@ -179,6 +245,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<PlayerEntitlement>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Entitlements_GetEntitlementByItemCode(itemCode);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByItemCode returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByItemCode returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerEntitlement>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string entitlementString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Entitlements, "getEntitlementByItemCode", true, itemCode);
@@ -216,6 +300,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<PlayerEntitlement>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Entitlements_GetEntitlementByItemId(itemId);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByItemId returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaEntitlementsPlatformFunc: GetEntitlementByItemId returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<PlayerEntitlement>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string entitlementString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Entitlements, "getEntitlementByItemId", true, itemId);

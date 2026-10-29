@@ -16,6 +16,13 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern IntPtr Auth_SerializeState();
         [DllImport("__Internal")] private static extern bool Auth_IsLoggedIn();
         [DllImport("__Internal")] private static extern IntPtr Auth_GetAccessToken();
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Auth_PromptLogin([MarshalAs(UnmanagedType.I1)] bool dismissable);
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Auth_CancelLogin();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Auth_Logout();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Auth_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] [return: MarshalAs(UnmanagedType.I1)] private static extern bool Auth_IsLoggedIn();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern IntPtr Auth_GetAccessToken();
 #else
         private static void Auth_PromptLogin(bool dismissable) { PlaytoliaInterop.UnsupportedPlatform(); }
         private static void Auth_CancelLogin() { PlaytoliaInterop.UnsupportedPlatform(); }
@@ -29,6 +36,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Auth_PromptLogin(dismissable);
                     break;
                 case RuntimePlatform.Android:
@@ -44,6 +52,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Auth_CancelLogin();
                     break;
                 case RuntimePlatform.Android:
@@ -59,6 +68,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Auth_Logout();
                     break;
                 case RuntimePlatform.Android:
@@ -75,6 +85,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     return Auth_IsLoggedIn();
                 case RuntimePlatform.Android:
                     string result = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Auth, "isLoggedIn", true);
@@ -95,6 +106,13 @@ namespace PlaytoliaSDK.Runtime
                     string token = Marshal.PtrToStringAnsi(tokenPtr);
                     Marshal.FreeHGlobal(tokenPtr);
                     return token ?? string.Empty;
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winTokenPtr = Auth_GetAccessToken();
+                    if (winTokenPtr == IntPtr.Zero) return string.Empty;
+                    string winToken = NativeStrings.TakeUtf8(winTokenPtr);
+                    return winToken ?? string.Empty;
+                }
                 case RuntimePlatform.Android:
                     return PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Auth, "getAccessToken", true) ?? string.Empty;
                 default:
@@ -125,6 +143,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<AuthState>(stateString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    IntPtr winStatePtr = Auth_SerializeState();
+                    if (winStatePtr == IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaAuthPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+                    
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaAuthPlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<AuthState>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string androidStateString = PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Auth, "serializeState", true);
                     if (string.IsNullOrEmpty(androidStateString))

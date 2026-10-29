@@ -27,6 +27,7 @@
 "settings_profile_info_title" = "INFORMAZIONI PROFILO";
 "settings_action_upload" = "CARICA";
 "settings_state_uploading" = "CARICAMENTO...";
+"common_state_uploading_progress" = "CARICAMENTO %d%%";
 "settings_field_username" = "Nome utente";
 "settings_field_display_name" = "Nome visualizzato";
 "settings_field_name" = "Nome";

@@ -21,6 +21,23 @@ namespace PlaytoliaSDK.Runtime
         [DllImport("__Internal")] private static extern System.IntPtr Store_GetItemBySku(string sku);
         [DllImport("__Internal")] private static extern void Store_BeginPurchaseFlow(string itemId, string callbackKey);
         [DllImport("__Internal")] private static extern void Store_BeginPurchaseFlowByCode(string code, string callbackKey);
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Store_Refresh();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Store_SerializeState();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Store_SearchItems(byte[] query);
+        private static System.IntPtr Store_SearchItems(string query) { return Store_SearchItems(NativeStrings.ToUtf8(query)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Store_GetItemsByType(byte[] type);
+        private static System.IntPtr Store_GetItemsByType(string type) { return Store_GetItemsByType(NativeStrings.ToUtf8(type)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Store_GetItemById(byte[] itemId);
+        private static System.IntPtr Store_GetItemById(string itemId) { return Store_GetItemById(NativeStrings.ToUtf8(itemId)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Store_GetItemByCode(byte[] code);
+        private static System.IntPtr Store_GetItemByCode(string code) { return Store_GetItemByCode(NativeStrings.ToUtf8(code)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Store_GetItemBySku(byte[] sku);
+        private static System.IntPtr Store_GetItemBySku(string sku) { return Store_GetItemBySku(NativeStrings.ToUtf8(sku)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Store_BeginPurchaseFlow(byte[] itemId, byte[] callbackKey);
+        private static void Store_BeginPurchaseFlow(string itemId, string callbackKey) { Store_BeginPurchaseFlow(NativeStrings.ToUtf8(itemId), NativeStrings.ToUtf8(callbackKey)); }
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern void Store_BeginPurchaseFlowByCode(byte[] code, byte[] callbackKey);
+        private static void Store_BeginPurchaseFlowByCode(string code, string callbackKey) { Store_BeginPurchaseFlowByCode(NativeStrings.ToUtf8(code), NativeStrings.ToUtf8(callbackKey)); }
 #else
         private static void Store_Refresh() { PlaytoliaInterop.UnsupportedPlatform(); }
         private static System.IntPtr Store_SerializeState() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
@@ -38,6 +55,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Store_Refresh();
                     break;
                 case RuntimePlatform.Android:
@@ -71,6 +89,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<Product>>(stateString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winStatePtr = Store_SerializeState();
+                    if (winStatePtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winStateString = NativeStrings.TakeUtf8(winStatePtr);
+                    
+                    if (string.IsNullOrEmpty(winStateString))
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetState returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<Product>>(winStateString);
+                }
                 case RuntimePlatform.Android:
                     string androidStateString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "serializeState", true);
@@ -109,6 +145,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<Product>>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Store_SearchItems(query);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: SearchItems returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: SearchItems returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<Product>>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string itemsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "searchItems", true, query);
@@ -147,6 +201,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<List<Product>>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Store_GetItemsByType(type);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemsByType returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemsByType returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<List<Product>>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string itemsString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "getItemsByType", true, type);
@@ -185,6 +257,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<Product>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Store_GetItemById(id);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemById returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemById returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<Product>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string itemString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "getItemById", true, id);
@@ -223,6 +313,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<Product>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Store_GetItemByCode(code);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemByCode returned null or empty value.");
+                        return null;
+                    }
+
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemByCode returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<Product>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string itemString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "getItemByCode", true, code);
@@ -261,6 +369,24 @@ namespace PlaytoliaSDK.Runtime
                         return null;
                     }
                     return JsonConvert.DeserializeObject<Product>(resultString);
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winResultPtr = Store_GetItemBySku(sku);
+                    if (winResultPtr == System.IntPtr.Zero)
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemBySku returned null or empty value.");
+                        return null;
+                    }
+                    
+                    string winResultString = NativeStrings.TakeUtf8(winResultPtr);
+                    
+                    if (string.IsNullOrEmpty(winResultString))
+                    {
+                        Debug.LogWarning("PlaytoliaStorePlatformFunc: GetItemBySku returned null or empty value.");
+                        return null;
+                    }
+                    return JsonConvert.DeserializeObject<Product>(winResultString);
+                }
                 case RuntimePlatform.Android:
                     string itemString =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Store, "getItemBySku", true, sku);
@@ -284,6 +410,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Store_BeginPurchaseFlow(itemId, callbackKey);
                     break;
                 case RuntimePlatform.Android:
@@ -302,6 +429,7 @@ namespace PlaytoliaSDK.Runtime
             switch (Application.platform)
             {
                 case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.WindowsPlayer:
                     Store_BeginPurchaseFlowByCode(code, callbackKey);
                     break;
                 case RuntimePlatform.Android:

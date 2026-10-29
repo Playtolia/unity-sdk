@@ -9,6 +9,9 @@ namespace PlaytoliaSDK.Runtime
 #if UNITY_IPHONE && !UNITY_EDITOR
         [DllImport("__Internal")] private static extern System.IntPtr Attribution_GetAttributionDataJson();
         [DllImport("__Internal")] private static extern System.IntPtr Attribution_GetInstallReferrerJson();
+#elif UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Attribution_GetAttributionDataJson();
+        [DllImport(NativeStrings.Library, CallingConvention = CallingConvention.Cdecl)] private static extern System.IntPtr Attribution_GetInstallReferrerJson();
 #else
         private static System.IntPtr Attribution_GetAttributionDataJson() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
         private static System.IntPtr Attribution_GetInstallReferrerJson() { PlaytoliaInterop.UnsupportedPlatform(); return System.IntPtr.Zero; }
@@ -38,6 +41,17 @@ namespace PlaytoliaSDK.Runtime
                     string str = Marshal.PtrToStringAnsi(ptr);
                     Marshal.FreeHGlobal(ptr);
                     return string.IsNullOrEmpty(str) ? null : str;
+                case RuntimePlatform.WindowsPlayer:
+                {
+                    System.IntPtr winPtr = iosFunc();
+                    if (winPtr == System.IntPtr.Zero)
+                    {
+                        return null;
+                    }
+
+                    string winStr = NativeStrings.TakeUtf8(winPtr);
+                    return string.IsNullOrEmpty(winStr) ? null : winStr;
+                }
                 case RuntimePlatform.Android:
                     string androidStr =
                         PlaytoliaAndroidInterop.ComponentCall(InteropComponent.Attribution, androidMethod, true);

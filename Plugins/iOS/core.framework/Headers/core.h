@@ -4297,14 +4297,13 @@ __attribute__((swift_name("GetPlayersResponse.Companion")))
 __attribute__((objc_subclassing_restricted))
 __attribute__((swift_name("GameAttributeResponse")))
 @interface CoreGameAttributeResponse : CoreBase
-- (instancetype)initWithKey:(NSString *)key gameID:(NSString *)gameID attributes:(NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *)attributes updatedAt:(NSString * _Nullable)updatedAt __attribute__((swift_name("init(key:gameID:attributes:updatedAt:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithKey:(NSString *)key attributes:(NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *)attributes updatedAt:(NSString * _Nullable)updatedAt __attribute__((swift_name("init(key:attributes:updatedAt:)"))) __attribute__((objc_designated_initializer));
 @property (class, readonly, getter=companion) CoreGameAttributeResponseCompanion *companion __attribute__((swift_name("companion")));
-- (CoreGameAttributeResponse *)doCopyKey:(NSString *)key gameID:(NSString *)gameID attributes:(NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *)attributes updatedAt:(NSString * _Nullable)updatedAt __attribute__((swift_name("doCopy(key:gameID:attributes:updatedAt:)")));
+- (CoreGameAttributeResponse *)doCopyKey:(NSString *)key attributes:(NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *)attributes updatedAt:(NSString * _Nullable)updatedAt __attribute__((swift_name("doCopy(key:attributes:updatedAt:)")));
 - (BOOL)isEqual:(id _Nullable)other __attribute__((swift_name("isEqual(_:)")));
 - (NSUInteger)hash __attribute__((swift_name("hash()")));
 - (NSString *)description __attribute__((swift_name("description()")));
 @property (readonly) NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *attributes __attribute__((swift_name("attributes")));
-@property (readonly) NSString *gameID __attribute__((swift_name("gameID")));
 @property (readonly) NSString *key __attribute__((swift_name("key")));
 @property (readonly) NSString * _Nullable updatedAt __attribute__((swift_name("updatedAt")));
 @end
@@ -4383,15 +4382,14 @@ __attribute__((swift_name("GetPlayerAttributeResponseData.Companion")))
 __attribute__((objc_subclassing_restricted))
 __attribute__((swift_name("PlayerAttributeResponse")))
 @interface CorePlayerAttributeResponse : CoreBase
-- (instancetype)initWithKey:(NSString *)key playerID:(NSString *)playerID attributes:(NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *)attributes updatedAt:(NSString * _Nullable)updatedAt __attribute__((swift_name("init(key:playerID:attributes:updatedAt:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithKey:(NSString *)key attributes:(NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *)attributes updatedAt:(NSString * _Nullable)updatedAt __attribute__((swift_name("init(key:attributes:updatedAt:)"))) __attribute__((objc_designated_initializer));
 @property (class, readonly, getter=companion) CorePlayerAttributeResponseCompanion *companion __attribute__((swift_name("companion")));
-- (CorePlayerAttributeResponse *)doCopyKey:(NSString *)key playerID:(NSString *)playerID attributes:(NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *)attributes updatedAt:(NSString * _Nullable)updatedAt __attribute__((swift_name("doCopy(key:playerID:attributes:updatedAt:)")));
+- (CorePlayerAttributeResponse *)doCopyKey:(NSString *)key attributes:(NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *)attributes updatedAt:(NSString * _Nullable)updatedAt __attribute__((swift_name("doCopy(key:attributes:updatedAt:)")));
 - (BOOL)isEqual:(id _Nullable)other __attribute__((swift_name("isEqual(_:)")));
 - (NSUInteger)hash __attribute__((swift_name("hash()")));
 - (NSString *)description __attribute__((swift_name("description()")));
 @property (readonly) NSDictionary<NSString *, CoreKotlinx_serialization_jsonJsonElement *> *attributes __attribute__((swift_name("attributes")));
 @property (readonly) NSString *key __attribute__((swift_name("key")));
-@property (readonly) NSString *playerID __attribute__((swift_name("playerID")));
 @property (readonly) NSString * _Nullable updatedAt __attribute__((swift_name("updatedAt")));
 @end
 
@@ -4768,6 +4766,7 @@ __attribute__((swift_name("AuthState")))
 /**
  * @note annotations
  *   kotlinx.serialization.SerialName(value="exp")
+ *   kotlinx.serialization.Serializable(with=NormalClass(value=com/playtolia/sdk/entity/auth/EpochSecondsSerializer))
 */
 @property (readonly) int64_t expiration __attribute__((swift_name("expiration")));
 @property (readonly) BOOL isExpired __attribute__((swift_name("isExpired")));
@@ -4783,6 +4782,7 @@ __attribute__((swift_name("AuthState")))
 /**
  * @note annotations
  *   kotlinx.serialization.SerialName(value="refreshExp")
+ *   kotlinx.serialization.Serializable(with=NormalClass(value=com/playtolia/sdk/entity/auth/EpochSecondsSerializer))
 */
 @property (readonly) int64_t refreshTokenExpiration __attribute__((swift_name("refreshTokenExpiration")));
 @property (readonly) int64_t sqlId __attribute__((swift_name("sqlId")));
@@ -6788,6 +6788,7 @@ __attribute__((swift_name("DeviceOS")))
 - (instancetype)initWithName:(NSString *)name ordinal:(int32_t)ordinal __attribute__((swift_name("init(name:ordinal:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
 @property (class, readonly) CoreDeviceOS *android __attribute__((swift_name("android")));
 @property (class, readonly) CoreDeviceOS *ios __attribute__((swift_name("ios")));
+@property (class, readonly) CoreDeviceOS *windows __attribute__((swift_name("windows")));
 @property (class, readonly) CoreDeviceOS *test __attribute__((swift_name("test")));
 + (CoreKotlinArray<CoreDeviceOS *> *)values __attribute__((swift_name("values()")));
 @property (class, readonly) NSArray<CoreDeviceOS *> *entries __attribute__((swift_name("entries")));
@@ -6946,6 +6947,7 @@ __attribute__((swift_name("SharedRes.strings")))
 @property (readonly) CoreResourcesStringResource *auth_verify_code_title __attribute__((swift_name("auth_verify_code_title")));
 @property (readonly) CoreResourcesStringResource *billing_menu_title __attribute__((swift_name("billing_menu_title")));
 @property (readonly) CoreResourcesStringResource *chat_menu_title __attribute__((swift_name("chat_menu_title")));
+@property (readonly) CoreResourcesStringResource *common_state_uploading_progress __attribute__((swift_name("common_state_uploading_progress")));
 @property (readonly) CoreResourcesStringResource *error_generic __attribute__((swift_name("error_generic")));
 @property (readonly) CoreResourcesStringResource *friends_action_add __attribute__((swift_name("friends_action_add")));
 @property (readonly) CoreResourcesStringResource *friends_action_message __attribute__((swift_name("friends_action_message")));

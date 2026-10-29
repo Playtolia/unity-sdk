@@ -27,6 +27,7 @@
 "settings_profile_info_title" = "ΠΛΗΡΟΦΟΡΙΕΣ ΠΡΟΦΙΛ";
 "settings_action_upload" = "ΜΕΤΑΦΟΡΤΩΣΗ";
 "settings_state_uploading" = "ΜΕΤΑΦΟΡΤΩΣΗ...";
+"common_state_uploading_progress" = "ΜΕΤΑΦΟΡΤΩΣΗ %d%%";
 "settings_field_username" = "Όνομα χρήστη";
 "settings_field_display_name" = "Εμφανιζόμενο όνομα";
 "settings_field_name" = "Όνομα";
