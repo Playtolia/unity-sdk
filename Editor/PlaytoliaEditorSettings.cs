@@ -40,6 +40,15 @@ enum OverlayMenuPresentationSetting
     LeftPanel
 }
 
+// Listed in the order the dropdown shows them. Append new modes so the values already serialized
+// in a project's settings asset keep the numbers they were saved with.
+enum TicketDiagnosticsSetting
+{
+    [InspectorName("Attach")] Attach,
+    [InspectorName("Only in debug mode")] OnlyInDebugMode,
+    [InspectorName("Do not attach")] DoNotAttach
+}
+
 // Create a new type of Settings Asset.
 class PlaytoliaEditorSettings : ScriptableObject
 {
@@ -134,6 +143,8 @@ class PlaytoliaEditorSettings : ScriptableObject
     [SerializeField] private bool m_AuthProviderDiscordEnabled;
     [SerializeField] private bool m_AuthProviderPlayAsGuestEnabled;
     [SerializeField] private bool m_TicketingEnabled;
+    // The initializer is what a settings asset saved before this option existed loads with.
+    [SerializeField] private TicketDiagnosticsSetting m_TicketDiagnostics = TicketDiagnosticsSetting.OnlyInDebugMode;
     [SerializeField] private bool m_BillingEnabled;
     [SerializeField] private bool m_PushEnabled;
     [SerializeField] private bool m_AutoPushPermissionCheck;
@@ -208,6 +219,7 @@ class PlaytoliaEditorSettings : ScriptableObject
             settings.m_AuthProviderDiscordEnabled = true;
             settings.m_AuthProviderPlayAsGuestEnabled = true;
             settings.m_TicketingEnabled = true;
+            settings.m_TicketDiagnostics = TicketDiagnosticsSetting.OnlyInDebugMode;
             settings.m_BillingEnabled = true;
             settings.m_PushEnabled = false;
             settings.m_AutoPushPermissionCheck = false;
@@ -421,6 +433,18 @@ class PlaytoliaEditorSettings : ScriptableObject
     {
         var settings = GetOrCreateSettings();
         return settings.m_TicketingEnabled;
+    }
+
+    public static string GetTicketDiagnostics()
+    {
+        var settings = GetOrCreateSettings();
+        // The values the native TicketDiagnosticsMode parser expects.
+        switch (settings.m_TicketDiagnostics)
+        {
+            case TicketDiagnosticsSetting.Attach: return "ALWAYS";
+            case TicketDiagnosticsSetting.DoNotAttach: return "NEVER";
+            default: return "DEBUG_ONLY";
+        }
     }
 
     public static bool IsBillingEnabled()
@@ -837,6 +861,20 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                     MessageType.Info);
                 EditorGUILayout.PropertyField(settings.FindProperty("m_TicketingEnabled"),
                     new GUIContent("Enable Ticketing"));
+                using (new EditorGUI.DisabledScope(!settings.FindProperty("m_TicketingEnabled").boolValue))
+                {
+                    EditorGUILayout.PropertyField(settings.FindProperty("m_TicketDiagnostics"),
+                        new GUIContent(
+                            "Attach diagnostics bundle with support tickets",
+                            "A file for your support team with the game version, device, SDK settings and state, " +
+                            "recent API calls and SDK logs. Credentials are removed and the player does not see it."));
+                    EditorGUILayout.HelpBox(
+                        "• Attach: every new ticket carries the bundle.\n" +
+                        "• Only in debug mode: tickets carry it while Debug Mode (General page) is enabled.\n" +
+                        "• Do not attach: no ticket carries it.\n" +
+                        "A ticket is always sent, even when the bundle cannot be created or uploaded.",
+                        MessageType.Info);
+                }
                 EditorGUILayout.Space();
 
                 // Playtolia.Billing
@@ -1321,7 +1359,7 @@ static class PlaytoliaEditorSettingsIMGUIRegister
                 pageKeywords = new[]
                 {
                     "Authentication", "Google", "Facebook", "Apple", "Discord", "Guest", "Legal",
-                    "Terms", "Privacy", "Ticketing", "Billing", "Store", "Push", "Notifications", "Social"
+                    "Terms", "Privacy", "Ticketing", "Diagnostics", "Billing", "Store", "Push", "Notifications", "Social"
                 };
                 break;
             case SettingsPage.DataAndDiagnostics:

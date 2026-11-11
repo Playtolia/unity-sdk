@@ -63,6 +63,7 @@ namespace Playtolia.Editor
             SetValue("discordAuthentication", PlaytoliaEditorSettings.IsAuthProviderDiscordEnabled());
             SetValue("guestAuthentication", PlaytoliaEditorSettings.IsAuthProviderPlayAsGuestEnabled());
             SetValue("enableTicketing", PlaytoliaEditorSettings.IsTicketingEnabled());
+            SetValue("ticketDiagnostics", PlaytoliaEditorSettings.GetTicketDiagnostics());
             SetValue("enableBilling", PlaytoliaEditorSettings.IsBillingEnabled());
             SetValue("enablePush", PlaytoliaEditorSettings.IsPushEnabled());
             SetValue("autoPushPermissionCheck", PlaytoliaEditorSettings.IsAutoPushPermissionCheckEnabled());
